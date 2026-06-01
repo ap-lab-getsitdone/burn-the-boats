@@ -232,7 +232,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       // Load from Firebase only (no stale localStorage interference)
       if (window.fbLoad) {
         window.fbLoad(function(data) {
-          if (data && data.started) {
+          if (data && (data.started || data.sig || data.startDate)) {
             window.S = data;
             try { localStorage.setItem('btb30v2', JSON.stringify(data)); } catch(e) {}
             showMain();
@@ -919,7 +919,7 @@ function load(callback){
   // Then try Firebase for latest cloud data
   if(window.fbLoad){
     window.fbLoad(function(data){
-      if(data && data.started) {
+      if(data && (data.started || data.sig || data.startDate)) {
         S=data;
         // Also update localStorage with cloud data
         try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
@@ -956,7 +956,7 @@ function signBegin(){
   const s=document.getElementById('sig').value.trim();
   if(!s){alert('Please sign your name.');return;}
   S.sig=s;S.startDate=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  S.started=true;
+  S.started="yes"; S._hasData=1;
   // Save to localStorage immediately
   try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
   // Save to Firebase
