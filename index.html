@@ -454,8 +454,8 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 
     <!-- Tab Toggle -->
     <div style="display:flex;width:100%;max-width:400px;margin-bottom:24px;background:var(--s1);border-radius:3px;border:1px solid var(--b1)">
-      <button id="tab-signin-btn" onclick="switchAuthTab('signin')" style="flex:1;padding:12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:3px 0 0 3px;cursor:pointer;background:var(--rd);color:white">Sign In</button>
-      <button id="tab-signup-btn" onclick="switchAuthTab('signup')" style="flex:1;padding:12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:0 3px 3px 0;cursor:pointer;background:transparent;color:var(--mu)">Create Account</button>
+      <button id="tab-signin-btn" onclick="switchAuthTab('signin')" ontouchend="switchAuthTab('signin')" style="flex:1;padding:16px 12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:3px 0 0 3px;cursor:pointer;background:var(--rd);color:white;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Sign In</button>
+      <button id="tab-signup-btn" onclick="switchAuthTab('signup')" ontouchend="switchAuthTab('signup')" style="flex:1;padding:16px 12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:0 3px 3px 0;cursor:pointer;background:transparent;color:var(--mu);-webkit-tap-highlight-color:transparent;touch-action:manipulation">Create Account</button>
     </div>
 
     <div style="width:100%;max-width:400px">
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div id="form-signin">
         <input type="email" id="signin-email" placeholder="Email address" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
         <input type="password" id="signin-password" placeholder="Password" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:16px">
-        <button onclick="handleSignIn()" class="btn btn-p" style="width:100%;margin-bottom:12px">Sign In →</button>
+        <button onclick="handleSignIn()" ontouchend="handleSignIn()" class="btn btn-p" style="width:100%;margin-bottom:12px;padding:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Sign In →</button>
         <div style="text-align:center">
           <button onclick="handleForgotPassword()" style="background:none;border:none;color:var(--mu);font-size:12px;cursor:pointer;font-family:var(--fb);text-decoration:underline">Forgot password?</button>
         </div>
@@ -475,7 +475,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
         <input type="email" id="signup-email" placeholder="Email address" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
         <input type="password" id="signup-password" placeholder="Create password (6+ characters)" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
         <input type="password" id="signup-confirm" placeholder="Confirm password" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:16px">
-        <button onclick="handleSignUp()" class="btn btn-p" style="width:100%">Create Account →</button>
+        <button onclick="handleSignUp()" ontouchend="handleSignUp()" class="btn btn-p" style="width:100%;padding:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Create Account →</button>
       </div>
 
       <!-- Error/Status Message -->
