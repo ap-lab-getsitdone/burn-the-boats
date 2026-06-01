@@ -1408,7 +1408,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         if(err.indexOf('email-already-in-use') > -1) {
           showMsg('Account already exists. Sign in instead.', true);
         } else {
-          showMsg('Could not create account. Please try again.', true);
+          showMsg('Error: ' + err, true);
         }
       } else {
         showMsg('Account created! Setting up your program...', false);
