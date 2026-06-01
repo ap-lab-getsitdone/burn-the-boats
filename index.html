@@ -186,7 +186,8 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   // ═══════════════════════════════════════════════
   // FIREBASE CONFIG — REPLACE WITH YOUR CREDENTIALS
@@ -194,27 +195,73 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   // Project Settings > Your Apps > SDK Setup
   // ═══════════════════════════════════════════════
   const firebaseConfig = {
-    apiKey: "AIzaSyBnq_xv6tdQABFo83aZEoE-Rt-GvoM6kWA",
-    authDomain: "btb-cloud-server.firebaseapp.com",
-    databaseURL: "https://btb-cloud-server-default-rtdb.firebaseio.com",
-    projectId: "btb-cloud-server",
-    storageBucket: "btb-cloud-server.appspot.com",
-    messagingSenderId: "461862709505",
-    appId: "1:461862709505:web:88dda7ff2b580cd3a3d300"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const auth = getAuth(app);
 
-  // ── UNIQUE USER ID ──
-  // Creates a unique ID per device/browser so multiple users can test simultaneously
-  function getUserId() {
-    let uid = localStorage.getItem('btb_uid');
-    if (!uid) { uid = 'user_' + Math.random().toString(36).substr(2,9); localStorage.setItem('btb_uid', uid); }
-    return uid;
-  }
-  const UID = getUserId();
+  // ── AUTH-BASED USER ID ──
+  let UID = null;
   const userRef = () => ref(db, 'users/' + UID);
+  
+  // Auth state listener
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      UID = user.uid;
+      console.log('Signed in. User ID:', UID);
+      // Hide auth screen, load data
+      document.getElementById('sc-auth').classList.remove('active');
+      load(function(){
+        if(window.S && window.S.started){
+          showMain();
+          if(window.fbListen) window.fbListen();
+        } else {
+          // New user — show setup
+          document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+          document.getElementById('sc-setup').classList.add('active');
+        }
+      });
+    } else {
+      UID = null;
+      // Show auth screen
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById('sc-auth').classList.add('active');
+    }
+  });
+
+  // ── AUTH FUNCTIONS ──
+  window.fbSignUp = function(email, password, callback) {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((cred) => { callback(null, cred.user); })
+      .catch((err) => { callback(err.message); });
+  };
+
+  window.fbSignIn = function(email, password, callback) {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((cred) => { callback(null, cred.user); })
+      .catch((err) => { callback(err.message); });
+  };
+
+  window.fbSignOut = function() {
+    signOut(auth).then(() => {
+      window.S = {started:false,sig:'',startDate:'',nns:[],cd:1,streak:0,days:{},debrief:{}};
+      try{localStorage.removeItem('btb30v2');}catch(e){}
+    });
+  };
+
+  window.fbResetPassword = function(email, callback) {
+    sendPasswordResetEmail(auth, email)
+      .then(() => callback(null))
+      .catch((err) => callback(err.message));
+  };
 
   // ── FIREBASE SAVE (replaces localStorage save) ──
   window.fbSave = function(data) {
@@ -395,10 +442,56 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   <button class="btn btn-p" style="max-width:280px" onclick="closeCeremony()">Continue →</button>
 </div>
 
+
+<!-- ═══════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════ -->
+<div id="sc-auth" class="screen active">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;background:var(--bg)">
+    
+    <div style="font-family:var(--fd);font-weight:900;font-size:32px;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px">BURN THE <span style="color:var(--rd)">BOATS</span></div>
+    <div style="font-size:11px;color:var(--mu);letter-spacing:3px;text-transform:uppercase;margin-bottom:40px">30-Day Discipline Protocol</div>
+
+    <!-- Tab Toggle -->
+    <div style="display:flex;width:100%;max-width:400px;margin-bottom:24px;background:var(--s1);border-radius:3px;border:1px solid var(--b1)">
+      <button id="tab-signin-btn" onclick="switchAuthTab('signin')" style="flex:1;padding:12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:3px 0 0 3px;cursor:pointer;background:var(--rd);color:white">Sign In</button>
+      <button id="tab-signup-btn" onclick="switchAuthTab('signup')" style="flex:1;padding:12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:0 3px 3px 0;cursor:pointer;background:transparent;color:var(--mu)">Create Account</button>
+    </div>
+
+    <div style="width:100%;max-width:400px">
+      
+      <!-- Sign In Form -->
+      <div id="form-signin">
+        <input type="email" id="signin-email" placeholder="Email address" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
+        <input type="password" id="signin-password" placeholder="Password" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:16px">
+        <button onclick="handleSignIn()" class="btn btn-p" style="width:100%;margin-bottom:12px">Sign In →</button>
+        <div style="text-align:center">
+          <button onclick="handleForgotPassword()" style="background:none;border:none;color:var(--mu);font-size:12px;cursor:pointer;font-family:var(--fb);text-decoration:underline">Forgot password?</button>
+        </div>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div id="form-signup" style="display:none">
+        <input type="email" id="signup-email" placeholder="Email address" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
+        <input type="password" id="signup-password" placeholder="Create password (6+ characters)" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
+        <input type="password" id="signup-confirm" placeholder="Confirm password" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:16px">
+        <button onclick="handleSignUp()" class="btn btn-p" style="width:100%">Create Account →</button>
+      </div>
+
+      <!-- Error/Status Message -->
+      <div id="auth-msg" style="margin-top:14px;font-size:12px;text-align:center;min-height:18px;color:var(--rd2)"></div>
+    </div>
+
+    <div style="margin-top:40px;font-size:10px;color:var(--di);text-align:center;line-height:1.6">
+      Your account syncs your progress across all devices.<br>One login. Phone, laptop, tablet — all connected.
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════
      SETUP SCREEN
 ═══════════════════════════════════ -->
-<div id="sc-setup" class="screen active">
+<div id="sc-setup" class="screen">
   <div class="topbar"><div class="brand">BURN THE <span>BOATS</span></div><div style="font-size:11px;color:var(--mu);letter-spacing:2px;text-transform:uppercase">Setup</div></div>
   <div class="sw">
 
@@ -523,7 +616,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       </div>
       <button onclick="openAdmin()" style="background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
     </div>
-    <div class="topbar-right"><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
+    <div class="topbar-right"><button onclick="handleSignOut()" style="background:transparent;border:none;color:var(--mu);font-size:10px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;margin-right:4px">SIGN OUT</button><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
       <div class="rank-pill" id="rank-display">Landlubber</div>
       <div class="streak">🔥 <span id="streak-n">0</span></div>
     </div>
@@ -1196,20 +1289,13 @@ function getCoach(){
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('sig-date');
   if(el)el.textContent='Date: '+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  
-  // Load data - check localStorage first, then Firebase
-  // Try immediate localStorage load
-  try{const d=localStorage.getItem('btb30v2');if(d){const parsed=JSON.parse(d);if(parsed&&parsed.started){S=parsed;showMain();}}}catch(e){}
-  
-  // Then load from Firebase and update if needed
+  // Auth state listener in Firebase module handles everything
+  // If Firebase fails to load, fall back to local
   setTimeout(function(){
-    load(function(){
-      if(S.started){
-        showMain();
-        if(window.fbListen) window.fbListen();
-      }
-    });
-  }, 500);
+    if(!window.firebaseReady){
+      try{const d=localStorage.getItem('btb30v2');if(d){const parsed=JSON.parse(d);if(parsed&&parsed.started){S=parsed;showMain();}}}catch(e){}
+    }
+  }, 3000);
 });
 </script>
 
