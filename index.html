@@ -256,7 +256,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 
   // ── FIREBASE SAVE (replaces localStorage save) ──
   window.fbSave = function(data) {
-    // Add timestamp to every save so latest device always wins
+    if (!UID) { console.warn('Cannot save - not signed in'); return; } // Guard against null UID
     data._lastSaved = Date.now();
     data._deviceId = UID;
     set(userRef(), data).catch(e => console.warn('Firebase save failed:', e));
@@ -265,6 +265,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 
   // ── FIREBASE LOAD (replaces localStorage load) ──
   window.fbLoad = function(callback) {
+    if (!UID) { callback(null); return; } // Guard against null UID
     get(userRef()).then(snapshot => {
       if (snapshot.exists()) {
         const cloudData = snapshot.val();
