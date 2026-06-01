@@ -215,18 +215,38 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   // Auth state change handler
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      const prevUID = localStorage.getItem('btb_auth_uid');
       UID = user.uid;
       console.log('Signed in:', UID);
+      
+      // If this is a different user than last time, clear localStorage
+      // so we dont load stale data from a previous session
+      if (prevUID !== UID) {
+        console.log('New auth user - clearing stale local data');
+        try { localStorage.removeItem('btb30v2'); } catch(e) {}
+        localStorage.setItem('btb_auth_uid', UID);
+      }
+      
       document.getElementById('sc-auth').classList.remove('active');
-      load(function(){
-        if(window.S && window.S.started){
-          showMain();
-          if(window.fbListen) window.fbListen();
-        } else {
-          document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-          document.getElementById('sc-setup').classList.add('active');
-        }
-      });
+      
+      // Load from Firebase only (no stale localStorage interference)
+      if (window.fbLoad) {
+        window.fbLoad(function(data) {
+          if (data && data.started) {
+            window.S = data;
+            try { localStorage.setItem('btb30v2', JSON.stringify(data)); } catch(e) {}
+            showMain();
+            if (window.fbListen) window.fbListen();
+          } else {
+            // No data in Firebase for this user - show setup
+            document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+            document.getElementById('sc-setup').classList.add('active');
+          }
+        });
+      } else {
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+        document.getElementById('sc-setup').classList.add('active');
+      }
     } else {
       UID = null;
       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
