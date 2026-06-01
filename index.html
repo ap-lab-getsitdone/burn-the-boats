@@ -195,13 +195,13 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   // Project Settings > Your Apps > SDK Setup
   // ═══════════════════════════════════════════════
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBnq_xv6tdQABFo83aZEoE-Rt-GvoM6kWA",
+    authDomain: "btb-cloud-server.firebaseapp.com",
+    databaseURL: "https://btb-cloud-server-default-rtdb.firebaseio.com",
+    projectId: "btb-cloud-server",
+    storageBucket: "btb-cloud-server.appspot.com",
+    messagingSenderId: "461862709505",
+    appId: "1:461862709505:web:88dda7ff2b580cd3a3d300"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -1408,7 +1408,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         if(err.indexOf('email-already-in-use') > -1) {
           showMsg('Account already exists. Sign in instead.', true);
         } else {
-          showMsg('Error: ' + err, true);
+          showMsg('Could not create account. Please try again.', true);
         }
       } else {
         showMsg('Account created! Setting up your program...', false);
