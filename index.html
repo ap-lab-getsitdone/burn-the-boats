@@ -1252,6 +1252,142 @@ function getCoach(){
   setTimeout(()=>{o.innerHTML='AI coaching feedback connects to the Anthropic API in the full release. It will read your reflection, reference your past entries, and respond like a no-BS coach — calling out patterns, naming the real resistance, giving you one clear action for tomorrow.';},1200);
 }
 
+
+// ADMIN DASHBOARD
+let adminDay = null;
+
+function openAdmin() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-admin').classList.add('active');
+  renderAdminDayList();
+  loadTesterActivity();
+  window.scrollTo(0,0);
+}
+
+function renderAdminDayList() {
+  const el = document.getElementById('admin-day-list');
+  if (!el) return;
+  el.innerHTML = '';
+  let curWk = 0;
+  DD.forEach((d, i) => {
+    const dayN = i + 1;
+    if (d.w !== curWk) {
+      curWk = d.w;
+      const wh = document.createElement('div');
+      wh.style.cssText = 'font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;padding:10px 0 6px;border-bottom:1px solid var(--b1);margin-bottom:6px;margin-top:'+(curWk>1?'14px':'0');
+      wh.textContent = 'Week ' + curWk + ' - ' + WK_NAMES[curWk-1];
+      el.appendChild(wh);
+    }
+    const dc = document.createElement('div');
+    dc.className = 'dc';
+    dc.style.marginBottom = '5px';
+    const hasOverride = window.contentOverrides && window.contentOverrides['day_'+dayN];
+    dc.innerHTML = '<div class="dci"><div class="dn" style="font-size:20px">'+(dayN<10?'0'+dayN:dayN)+'</div><div class="dic"><div class="dct" style="font-size:13px">'+d.t+'</div><div class="dcm">'+(hasOverride?'Modified':'Original')+'</div></div><div style="font-size:12px;color:var(--mu)">Edit</div></div>';
+    dc.onclick = function() { openDayEditor(dayN); };
+    el.appendChild(dc);
+  });
+}
+
+function openDayEditor(dayN) {
+  adminDay = dayN;
+  const d = DD[dayN-1];
+  const override = window.contentOverrides && window.contentOverrides['day_'+dayN];
+  const content = override || { t: d.t, r: d.r, q: d.q, c: d.c };
+  document.getElementById('admin-edit-label').textContent = 'Editing Day ' + dayN + ' - ' + d.t;
+  document.getElementById('admin-title').value = content.t || d.t;
+  document.getElementById('admin-reading').value = content.r || d.r;
+  document.getElementById('admin-quote').value = content.q || d.q;
+  document.getElementById('admin-c1').value = (content.c && content.c[0]) || d.c[0];
+  document.getElementById('admin-c2').value = (content.c && content.c[1]) || d.c[1];
+  document.getElementById('admin-c3').value = (content.c && content.c[2]) || d.c[2];
+  document.getElementById('admin-editor').style.display = 'block';
+  document.getElementById('admin-editor').scrollIntoView({behavior:'smooth'});
+}
+
+function pushContentUpdate() {
+  if (!adminDay) return;
+  const update = {
+    t: document.getElementById('admin-title').value.trim(),
+    r: document.getElementById('admin-reading').value.trim(),
+    q: document.getElementById('admin-quote').value.trim(),
+    c: [
+      document.getElementById('admin-c1').value.trim(),
+      document.getElementById('admin-c2').value.trim(),
+      document.getElementById('admin-c3').value.trim()
+    ],
+    updatedAt: new Date().toISOString()
+  };
+  const status = document.getElementById('admin-status');
+  status.textContent = 'Pushing update...';
+  status.style.color = 'var(--am)';
+  DD[adminDay-1].t = update.t;
+  DD[adminDay-1].r = update.r;
+  DD[adminDay-1].q = update.q;
+  DD[adminDay-1].c = update.c;
+  if (!window.contentOverrides) window.contentOverrides = {};
+  window.contentOverrides['day_'+adminDay] = update;
+  if (window.fbPushContent) {
+    window.fbPushContent(adminDay, update, function() {
+      status.textContent = 'Update pushed to all testers';
+      status.style.color = 'var(--gn)';
+      renderAdminDayList();
+      setTimeout(function() { status.textContent = ''; }, 3000);
+    });
+  } else {
+    status.textContent = 'Updated locally';
+    status.style.color = 'var(--am)';
+    renderAdminDayList();
+    setTimeout(function() { status.textContent = ''; }, 3000);
+  }
+}
+
+function resetDayContent() {
+  if (!adminDay) return;
+  if (!confirm('Reset Day ' + adminDay + ' to original content?')) return;
+  const d = DD[adminDay-1];
+  document.getElementById('admin-title').value = d.t;
+  document.getElementById('admin-reading').value = d.r;
+  document.getElementById('admin-quote').value = d.q;
+  document.getElementById('admin-c1').value = d.c[0];
+  document.getElementById('admin-c2').value = d.c[1];
+  document.getElementById('admin-c3').value = d.c[2];
+  document.getElementById('admin-status').textContent = 'Reset to original';
+  if (!window.contentOverrides) window.contentOverrides = {};
+  delete window.contentOverrides['day_'+adminDay];
+  renderAdminDayList();
+  setTimeout(function() { document.getElementById('admin-status').textContent = ''; }, 2000);
+}
+
+function loadTesterActivity() {
+  if (!window.fbGetTesters) return;
+  window.fbGetTesters(function(testers) {
+    const el = document.getElementById('admin-tester-list');
+    if (!el) return;
+    if (!testers || Object.keys(testers).length === 0) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--di)">No tester activity yet</div>';
+      return;
+    }
+    const uids = Object.keys(testers);
+    const totalUsers = document.getElementById('admin-total-users');
+    if (totalUsers) totalUsers.textContent = uids.length;
+    let totalDay = 0, totalComp = 0;
+    el.innerHTML = '';
+    uids.forEach(function(uid, idx) {
+      const u = testers[uid];
+      totalDay += (u.cd || 1);
+      totalComp += u.streak || 0;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:2px;margin-bottom:5px;font-size:12px;';
+      row.innerHTML = '<span style="color:var(--mu)">Tester '+(idx+1)+(u.sig?' ('+u.sig+')':'')+'</span><span style="color:var(--tx)">Day '+(u.cd||1)+' - '+(u.streak||0)+'</span>';
+      el.appendChild(row);
+    });
+    const avgDay = document.getElementById('admin-avg-day');
+    const completions = document.getElementById('admin-completions');
+    if (avgDay) avgDay.textContent = Math.round(totalDay/uids.length);
+    if (completions) completions.textContent = totalComp;
+  });
+}
+
 // ═══════════════════════════════════
 // INIT
 // ═══════════════════════════════════
