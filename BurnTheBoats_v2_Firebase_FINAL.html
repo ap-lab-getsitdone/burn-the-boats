@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burn the Boats — 30-Day Discipline Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--s1:#141414;--s2:#1c1c1c;--s3:#222;
+  --b1:#282828;--b2:#363636;--b3:#444;
+  --tx:#f0ede8;--mu:#888;--di:#484848;
+  --rd:#c0392b;--rd2:#e74c3c;--gn:#27ae60;--gn2:#2ecc71;
+  --am:#e67e22;--am2:#f39c12;--go:#d4a017;
+  --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);min-height:100vh}
+.screen{display:none}.screen.active{display:block;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--s1);border-bottom:1px solid var(--b1);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:3px;text-transform:uppercase}
+.brand span{color:var(--rd)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.streak{background:var(--rd);color:#fff;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;padding:5px 10px;border-radius:2px}
+.rank-pill{background:var(--s2);border:1px solid var(--go);color:var(--go);font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:1.5px;padding:4px 10px;border-radius:2px;text-transform:uppercase}
+.day-ind{font-size:10px;color:var(--mu);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+
+/* TABS */
+.tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--b1)}
+.tab{flex:1;padding:11px 4px;text-align:center;font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--tx)}.tab.active{color:var(--tx);border-bottom-color:var(--rd)}
+
+/* CONTENT */
+.content{padding:20px;max-width:680px;margin:0 auto;padding-bottom:60px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* TYPE */
+.slbl{font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--mu);margin-bottom:10px;margin-top:22px}
+.slbl:first-child{margin-top:0}
+.big-title{font-family:var(--fd);font-weight:900;font-size:40px;line-height:1;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.big-sub{font-size:13px;color:var(--mu);line-height:1.6;margin-bottom:20px}
+.btext{font-size:14px;line-height:1.8;color:#ccc;margin-bottom:10px}
+.pquote{font-family:var(--fd);font-size:18px;font-weight:600;font-style:italic;color:var(--tx);border-left:3px solid var(--rd);padding:12px 16px;margin:16px 0;background:var(--s2);border-radius:0 3px 3px 0}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:16px;margin-bottom:10px}
+.rcard{background:var(--s1);border-left:3px solid var(--rd);padding:18px 20px;margin-bottom:16px;border-radius:0 3px 3px 0}
+
+/* BUTTONS */
+.btn{font-family:var(--fd);font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;padding:13px 22px;border:none;border-radius:2px;cursor:pointer;transition:all .15s;display:block;width:100%;text-align:center}
+.btn-p{background:var(--rd);color:#fff}.btn-p:hover{background:var(--rd2)}
+.btn-s{background:transparent;color:var(--tx);border:1px solid var(--b2);padding:10px 18px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-radius:2px;display:inline-block}
+.btn-s:hover{border-color:var(--tx)}
+.btn-g{background:transparent;color:var(--mu);border:1px dashed var(--b2);width:100%;padding:11px;font-size:12px;letter-spacing:1px;font-family:var(--fb);cursor:pointer;border-radius:2px;transition:all .15s}
+.btn-g:hover{border-color:var(--am);color:var(--am)}
+.back-btn{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-weight:600;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);cursor:pointer;padding:14px 20px 0;transition:color .15s;background:none;border:none;max-width:680px;margin:0 auto;width:100%}
+.back-btn:hover{color:var(--tx)}
+
+/* FORMS */
+input[type=text],textarea{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:13px;padding:10px 12px;transition:border-color .15s;margin-bottom:8px}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--b3)}
+input[type=text]::placeholder,textarea::placeholder{color:var(--di)}
+textarea{resize:vertical;min-height:70px;line-height:1.6}
+
+/* CHECK ITEMS */
+.ci{display:flex;align-items:center;gap:14px;background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:13px 16px;margin-bottom:6px;cursor:pointer;transition:all .15s;user-select:none}
+.ci:hover{border-color:var(--b2)}.ci.done{border-color:var(--gn);background:#0a180c}
+.ci.done .cbox{background:var(--gn);border-color:var(--gn)}
+.cbox{width:22px;height:22px;border:2px solid var(--b2);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#fff;transition:all .15s}
+.ctext{font-size:14px;line-height:1.4;flex:1}
+.ci.done .ctext{color:var(--mu);text-decoration:line-through}
+
+/* EXCUSES */
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 14px}
+.ebtn{background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:9px 11px;font-size:12px;color:var(--mu);cursor:pointer;text-align:left;font-family:var(--fb);line-height:1.4;transition:all .15s}
+.ebtn:hover{border-color:var(--b2);color:var(--tx)}.ebtn.sel{border-color:var(--am);color:var(--am);background:#140e00}
+
+/* PROGRESS */
+.pw{background:var(--s2);border-radius:2px;height:4px;margin:10px 0 6px}
+.pf{background:var(--rd);height:4px;border-radius:2px;transition:width .3s}
+.plbl{font-size:11px;color:var(--mu);text-align:right}
+
+/* DAY CARDS */
+.dc{background:var(--s1);border:1px solid var(--b1);border-radius:3px;margin-bottom:7px;cursor:pointer;transition:all .15s;overflow:hidden}
+.dc:hover:not(.locked){border-color:var(--b2)}.dc.locked{opacity:.4;cursor:not-allowed}
+.dc.completed{border-color:var(--gn)}.dc.is-today{border-color:var(--rd)}
+.dci{display:flex;align-items:center;padding:14px 16px;gap:14px}
+.dn{font-family:var(--fd);font-weight:900;font-size:30px;line-height:1;color:var(--di);min-width:40px}
+.dc.completed .dn{color:var(--gn)}.dc.is-today .dn{color:var(--rd)}
+.dic{flex:1}
+.dct{font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:.5px;text-transform:uppercase}
+.dcm{font-size:11px;color:var(--mu);margin-top:2px}
+.dico{font-size:18px;color:var(--di)}
+.dc.completed .dico{color:var(--gn)}.dc.is-today .dico{color:var(--rd)}
+
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.scard{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:14px 10px;text-align:center}
+.snum{font-family:var(--fd);font-weight:900;font-size:32px;line-height:1}
+.slb{font-size:10px;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.tr{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:11px 14px;margin-bottom:7px;font-size:13px}
+.tr.pass{border-color:var(--gn);color:var(--gn)}.tr.fail{border-color:var(--rd);color:#e74c3c}
+
+/* SETUP */
+.sw{padding:28px 20px 60px;max-width:600px;margin:0 auto}
+.sph{display:none}.sph.active{display:block}
+.cbox2{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:16px;font-size:13px;line-height:1.9;color:var(--mu);margin-bottom:16px}
+.cbox2 strong{color:var(--tx);font-weight:600}
+.rrow{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.rnum{font-family:var(--fd);font-weight:900;font-size:22px;color:var(--rd);min-width:28px;line-height:1.2}
+.rtit{font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.rdsc{font-size:13px;color:var(--mu);line-height:1.5}
+.erow{display:flex;gap:8px;margin-bottom:6px}
+.etag{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:2px;text-transform:uppercase;flex-shrink:0;margin-top:1px}
+.etag.good{background:#0a1f0e;color:var(--gn);border:1px solid var(--gn)}
+.etag.bad{background:#1a0a0a;color:var(--rd);border:1px solid var(--rd)}
+.etxt{font-size:13px;color:#ccc;line-height:1.5}
+.t2{width:100%;border-collapse:collapse;margin:12px 0}
+.t2 th{background:var(--s2);font-family:var(--fd);font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--b2)}
+.t2 td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--b1);vertical-align:top;line-height:1.5}
+.t2 td:first-child{color:var(--mu);font-style:italic;width:50%}
+.t2 tr:last-child td{border-bottom:none}
+.div{height:1px;background:var(--b1);margin:18px 0}
+
+/* DAY VIEW */
+.dh{padding:20px 0 18px;border-bottom:1px solid var(--b1);margin-bottom:20px}
+.dhl{font-family:var(--fd);font-weight:700;font-size:12px;letter-spacing:3px;color:var(--rd);text-transform:uppercase;margin-bottom:4px}
+.dht{font-family:var(--fd);font-weight:900;font-size:44px;line-height:1;text-transform:uppercase;letter-spacing:1px}
+.dhs{font-size:12px;color:var(--mu);margin-top:6px;letter-spacing:.5px}
+
+/* REFLECTION */
+.rlbl{font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-top:14px;margin-bottom:5px}
+.ynr{display:flex;gap:8px;margin-bottom:10px}
+.ynb{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:10px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--mu);transition:all .15s}
+.ynb:hover{border-color:var(--b2);color:var(--tx)}
+.ynb.ysel{border-color:var(--gn);color:var(--gn);background:#0a180c}
+.ynb.nsel{border-color:var(--rd);color:var(--rd2);background:#1a0808}
+.cout{background:#0d1a00;border:1px solid #2a400a;border-radius:3px;padding:14px;margin-top:10px;font-size:13px;line-height:1.8;color:#9fc97a;display:none}
+
+/* RESISTANCE SLIDER */
+.resist-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:14px 16px;margin-bottom:10px}
+.resist-q{font-family:var(--fd);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:10px}
+.resist-slider{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--b2);outline:none;margin-bottom:8px}
+.resist-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--rd);cursor:pointer}
+.resist-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--mu)}
+.resist-val{font-family:var(--fd);font-weight:900;font-size:28px;color:var(--rd);text-align:center;margin-bottom:4px}
+
+/* RANK CEREMONY */
+.ceremony{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px}
+.ceremony.show{display:flex}
+.cer-day{font-family:var(--fd);font-weight:900;font-size:80px;line-height:1;color:var(--rd);margin-bottom:4px}
+.cer-streak{font-family:var(--fd);font-size:16px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;margin-bottom:24px}
+.cer-rank{font-family:var(--fd);font-weight:900;font-size:36px;color:var(--go);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.cer-rank-label{font-size:13px;color:var(--mu);margin-bottom:6px;letter-spacing:1px}
+.cer-msg{font-size:15px;color:#ccc;line-height:1.7;max-width:320px;margin:0 auto 24px}
+.cer-preview{background:var(--s2);border-left:3px solid var(--rd);padding:10px 14px;font-size:13px;font-style:italic;color:var(--mu);margin-bottom:24px;border-radius:0 3px 3px 0;max-width:340px;text-align:left}
+.cer-preview-lbl{font-family:var(--fd);font-size:10px;letter-spacing:2px;color:var(--di);margin-bottom:4px;text-transform:uppercase}
+
+/* RANK TABLE */
+.rank-table{width:100%;border-collapse:collapse;margin:12px 0}
+.rank-table th{background:var(--s2);font-family:var(--fd);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--b2);color:var(--mu)}
+.rank-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--b1)}
+.rank-table tr.current-rank td{background:var(--s2);color:var(--go)}
+.rank-name{font-family:var(--fd);font-weight:700;font-size:14px;color:var(--go);letter-spacing:.5px}
+
+/* PROGRAM PHASES */
+.phase-hdr{padding:10px 0 6px;margin-top:18px;margin-bottom:8px;border-bottom:1px solid var(--b1)}
+.phase-name{font-family:var(--fd);font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase}
+.phase-theme{font-size:11px;color:var(--mu);margin-top:2px}
+.wk-badge{display:inline-block;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-left:8px}
+.wk1{background:#2a0a0a;color:#e74c3c;border:1px solid #c0392b}
+.wk2{background:#1a1200;color:#e67e22;border:1px solid #d35400}
+.wk3{background:#0a0e1a;color:#3498db;border:1px solid #2980b9}
+.wk4{background:#0a1a0a;color:#27ae60;border:1px solid #1e8449}
+
+/* RESIST GRAPH */
+.resist-graph{display:flex;align-items:flex-end;gap:3px;height:60px;margin:10px 0}
+.rg-bar{flex:1;background:var(--rd);border-radius:2px 2px 0 0;min-height:4px;transition:height .3s;opacity:.7}
+.rg-bar.empty{background:var(--b2);opacity:.4}
+
+@media(max-width:480px){.egrid{grid-template-columns:1fr}.dht{font-size:32px}.big-title{font-size:28px}.cer-day{font-size:60px}}
+</style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ═══════════════════════════════════════════════
+  // FIREBASE CONFIG — REPLACE WITH YOUR CREDENTIALS
+  // Get these from: console.firebase.google.com
+  // Project Settings > Your Apps > SDK Setup
+  // ═══════════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyBnq_xv6tdQABFo83aZEoE-Rt-GvoM6kWA",
+    authDomain: "btb-cloud-server.firebaseapp.com",
+    databaseURL: "https://btb-cloud-server-default-rtdb.firebaseio.com",
+    projectId: "btb-cloud-server",
+    storageBucket: "btb-cloud-server.appspot.com",
+    messagingSenderId: "461862709505",
+    appId: "1:461862709505:web:88dda7ff2b580cd3a3d300"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // ── UNIQUE USER ID ──
+  // Creates a unique ID per device/browser so multiple users can test simultaneously
+  function getUserId() {
+    let uid = localStorage.getItem('btb_uid');
+    if (!uid) { uid = 'user_' + Math.random().toString(36).substr(2,9); localStorage.setItem('btb_uid', uid); }
+    return uid;
+  }
+  const UID = getUserId();
+  const userRef = () => ref(db, 'users/' + UID);
+
+  // ── FIREBASE SAVE (replaces localStorage save) ──
+  window.fbSave = function(data) {
+    // Add timestamp to every save so latest device always wins
+    data._lastSaved = Date.now();
+    data._deviceId = UID;
+    set(userRef(), data).catch(e => console.warn('Firebase save failed:', e));
+    try { localStorage.setItem('btb30v2', JSON.stringify(data)); } catch(e) {}
+  };
+
+  // ── FIREBASE LOAD (replaces localStorage load) ──
+  window.fbLoad = function(callback) {
+    get(userRef()).then(snapshot => {
+      if (snapshot.exists()) {
+        const cloudData = snapshot.val();
+        // Compare timestamps — use whichever is more recent
+        try {
+          const localRaw = localStorage.getItem('btb30v2');
+          if (localRaw) {
+            const localData = JSON.parse(localRaw);
+            const cloudTime = cloudData._lastSaved || 0;
+            const localTime = localData._lastSaved || 0;
+            if (localTime > cloudTime) {
+              console.log('Using local data (more recent)');
+              callback(localData);
+              return;
+            }
+          }
+        } catch(e) {}
+        console.log('Using cloud data (more recent)');
+        callback(cloudData);
+      } else {
+        try {
+          const local = localStorage.getItem('btb30v2');
+          if (local) callback(JSON.parse(local));
+          else callback(null);
+        } catch(e) { callback(null); }
+      }
+    }).catch(e => {
+      console.warn('Firebase load failed, using local:', e);
+      try {
+        const local = localStorage.getItem('btb30v2');
+        if (local) callback(JSON.parse(local));
+        else callback(null);
+      } catch(err) { callback(null); }
+    });
+  };
+
+  // ── REAL-TIME SYNC ──
+  // Listens for changes from other devices and updates the UI
+  window.fbListen = function() {
+    onValue(userRef(), (snapshot) => {
+      if (snapshot.exists()) {
+        const newData = snapshot.val();
+        const oldCd = window.S ? window.S.cd : null;
+        window.S = newData;
+        // Only re-render if we're on the main screen and something changed
+        if (window.S.started && document.getElementById('sc-main').classList.contains('active')) {
+          if (oldCd !== null) {
+            try { showMain(); } catch(e) {}
+          }
+        }
+      }
+    });
+  };
+
+  // ── SYNC STATUS INDICATOR ──
+  window.showSyncStatus = function(status) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    if (status === 'saved') {
+      el.textContent = '✓ Synced';
+      el.style.color = '#27ae60';
+    } else if (status === 'saving') {
+      el.textContent = '↑ Saving...';
+      el.style.color = '#e67e22';
+    } else if (status === 'offline') {
+      el.textContent = '⚡ Offline — saved locally';
+      el.style.color = '#888';
+    }
+    clearTimeout(window._syncTimer);
+    window._syncTimer = setTimeout(() => { if(el) el.textContent = ''; }, 3000);
+  };
+
+
+  // ── CONTENT MANAGEMENT ──
+  const contentRef = ref(db, 'content_overrides');
+  
+  // Push content update to all testers
+  window.fbPushContent = function(dayNum, content, callback) {
+    set(ref(db, 'content_overrides/day_' + dayNum), content)
+      .then(() => {
+        if (!window.contentOverrides) window.contentOverrides = {};
+        window.contentOverrides['day_' + dayNum] = content;
+        if (callback) callback();
+      })
+      .catch(e => { console.warn('Content push failed:', e); if(callback) callback(); });
+  };
+
+  // Reset content override
+  window.fbResetContent = function(dayNum, callback) {
+    set(ref(db, 'content_overrides/day_' + dayNum), null)
+      .then(() => {
+        if (window.contentOverrides) delete window.contentOverrides['day_' + dayNum];
+        if (callback) callback();
+      })
+      .catch(e => { if(callback) callback(); });
+  };
+
+  // Get all tester data for admin view
+  window.fbGetTesters = function(callback) {
+    get(ref(db, 'users')).then(snapshot => {
+      if (snapshot.exists()) callback(snapshot.val());
+      else callback({});
+    }).catch(() => callback({}));
+  };
+
+  // Listen for content overrides and apply them live
+  onValue(contentRef, (snapshot) => {
+    if (snapshot.exists()) {
+      window.contentOverrides = snapshot.val();
+      // Apply overrides to DD array
+      Object.keys(window.contentOverrides).forEach(key => {
+        const dayNum = parseInt(key.replace('day_', ''));
+        if (dayNum >= 1 && dayNum <= 30) {
+          const override = window.contentOverrides[key];
+          if (override && override.t) {
+            DD[dayNum-1].t = override.t;
+            DD[dayNum-1].r = override.r;
+            DD[dayNum-1].q = override.q;
+            DD[dayNum-1].c = override.c;
+          }
+        }
+      });
+      console.log('Content overrides applied:', Object.keys(window.contentOverrides).length, 'days updated');
+    }
+  });
+
+  // Mark Firebase as ready
+  window.firebaseReady = true;
+  console.log('Firebase initialized. User ID:', UID);
+</script>
+</head>
+<body>
+<!-- Loading Overlay -->
+<div id="loading-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;letter-spacing:4px;color:#f0ede8;text-transform:uppercase;margin-bottom:16px">BURN THE BOATS</div>
+  <div style="font-size:11px;color:#888;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px">Syncing your progress...</div>
+  <div style="width:200px;height:2px;background:#282828;border-radius:2px;overflow:hidden">
+    <div id="load-bar" style="width:0%;height:100%;background:#c0392b;border-radius:2px;transition:width 0.8s ease"></div>
+  </div>
+</div>
+<script>
+  // Animate loading bar and hide overlay
+  setTimeout(()=>{ const b=document.getElementById('load-bar'); if(b) b.style.width='70%'; }, 100);
+  setTimeout(()=>{ const b=document.getElementById('load-bar'); if(b) b.style.width='100%'; }, 600);
+  setTimeout(()=>{ 
+    const o=document.getElementById('loading-overlay'); 
+    if(o){ o.style.opacity='0'; o.style.transition='opacity 0.3s'; setTimeout(()=>{ o.style.display='none'; },300); }
+  }, 1000);
+</script>
+
+
+<!-- ═══════════════════════════════════
+     RANK CEREMONY OVERLAY
+═══════════════════════════════════ -->
+<div class="ceremony" id="ceremony">
+  <div class="cer-streak" id="cer-streak">STREAK: 0</div>
+  <div class="cer-day" id="cer-day">7</div>
+  <div style="font-family:var(--fd);font-size:13px;letter-spacing:3px;color:var(--mu);margin-bottom:20px;text-transform:uppercase">Days Complete</div>
+  <div class="cer-rank-label" id="cer-rank-label">YOU HAVE EARNED THE RANK OF</div>
+  <div class="cer-rank" id="cer-rank">Sailor</div>
+  <div class="cer-msg" id="cer-msg"></div>
+  <div class="cer-preview">
+    <div class="cer-preview-lbl">Tomorrow</div>
+    <div id="cer-preview-txt"></div>
+  </div>
+  <button class="btn btn-p" style="max-width:280px" onclick="closeCeremony()">Continue →</button>
+</div>
+
+<!-- ═══════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════ -->
+<div id="sc-setup" class="screen active">
+  <div class="topbar"><div class="brand">BURN THE <span>BOATS</span></div><div style="font-size:11px;color:var(--mu);letter-spacing:2px;text-transform:uppercase">Setup</div></div>
+  <div class="sw">
+
+    <div class="sph active" id="ph-intro">
+      <div class="big-title">30-Day<br>Discipline<br>Protocol</div>
+      <div class="big-sub">Set aside 15–20 minutes. This is the only admin you will ever do. After this, the work is physical.</div>
+      <div class="card">
+        <div class="rrow"><div class="rnum">1</div><div><div class="rtit">Your Non-Negotiables</div><div class="rdsc">The minimum standard you live by — every day, no matter what.</div></div></div>
+        <div class="rrow"><div class="rnum">2</div><div><div class="rtit">Daily Challenges</div><div class="rdsc">Placed intentionally. Built to escalate week over week.</div></div></div>
+        <div class="rrow"><div class="rnum">3</div><div><div class="rtit">5-Minute Reflection</div><div class="rdsc">Every day. No skipping.</div></div></div>
+        <div class="btext" style="margin-top:10px;margin-bottom:0"><em>The program won't build discipline for you. What you do throughout the day will.</em></div>
+      </div>
+      <button class="btn btn-p" style="margin-top:16px" onclick="goPh('ph-nns')">Continue →</button>
+    </div>
+
+    <div class="sph" id="ph-nns">
+      <div class="big-title">Set Your<br>Standard</div>
+      <div class="big-sub">A non-negotiable is not a goal. It is the minimum you live by — every day.</div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:10px">The Rules</div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Keep it small</div><div class="rdsc">If it's too big, you'll avoid it.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Be specific</div><div class="rdsc">"Work harder" is not allowed.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Effort-based, not outcome-based</div><div class="rdsc">You control effort — not results.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">3–5 maximum</div><div class="rdsc">Discipline beats overload.</div></div></div>
+        <div class="div" style="margin:10px 0 12px"></div>
+        <div style="font-family:var(--fd);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:8px">Examples</div>
+        <div class="erow"><span class="etag good">Strong</span><span class="etxt">Wake up at 6:30am every day</span></div>
+        <div class="erow"><span class="etag good">Strong</span><span class="etxt">10 minutes of meditation daily</span></div>
+        <div class="erow"><span class="etag good">Strong</span><span class="etxt">No phone 30 minutes after waking</span></div>
+        <div class="erow"><span class="etag bad">Weak</span><span class="etxt">Be more productive</span></div>
+        <div class="erow"><span class="etag bad">Weak</span><span class="etxt">Go hard every day</span></div>
+      </div>
+      <div class="slbl">Your Non-Negotiables (minimum 3)</div>
+      <input type="text" id="nn1" placeholder="Non-negotiable #1 — e.g. Wake up at 6:30am">
+      <input type="text" id="nn2" placeholder="Non-negotiable #2 — e.g. 10 min meditation">
+      <input type="text" id="nn3" placeholder="Non-negotiable #3 — e.g. Read 5 pages">
+      <input type="text" id="nn4" placeholder="Non-negotiable #4 (optional)">
+      <input type="text" id="nn5" placeholder="Non-negotiable #5 (optional)">
+      <button class="btn btn-p" style="margin-top:8px" onclick="saveNNs()">Continue →</button>
+    </div>
+
+    <div class="sph" id="ph-resistance">
+      <div class="big-title">Know Your<br>Enemy</div>
+      <div class="big-sub">Before Day 1, understand what you're up against.</div>
+      <div class="card">
+        <div class="btext"><strong style="color:var(--tx)">Resistance</strong> is the internal pushback you feel the moment you try to move forward.</div>
+        <div class="btext">It doesn't show up when you're coasting. It shows up right before growth — disguised as excuses, delay, distraction, and self-doubt.</div>
+        <div class="pquote">"Resistance is not a problem to solve. It is the threshold every meaningful change requires you to cross."</div>
+        <div style="font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;color:var(--mu);margin-bottom:8px">HOW IT SHOWS UP</div>
+        <div class="btext" style="color:var(--mu);margin-bottom:4px">"I'll do it later."</div>
+        <div class="btext" style="color:var(--mu);margin-bottom:4px">"I'm too tired today."</div>
+        <div class="btext" style="color:var(--mu);margin-bottom:4px">"I'll restart when things calm down."</div>
+        <div class="btext" style="color:var(--mu);margin-bottom:4px">"Missing one day won't matter."</div>
+        <div class="btext" style="margin-top:10px"><em>Every one of those feels like logic. None of them are.</em></div>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <div style="font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;color:var(--mu);margin-bottom:10px">DON'T ARGUE WITH EXCUSES — REPLACE THEM</div>
+        <table class="t2">
+          <thead><tr><th>The Excuse</th><th>The Response</th></tr></thead>
+          <tbody>
+            <tr><td>"I don't have time"</td><td>Do the smallest possible version. Start anyway.</td></tr>
+            <tr><td>"I'm too tired"</td><td>Do it tired. Lower intensity — never consistency.</td></tr>
+            <tr><td>"I already missed a day"</td><td>Continue immediately. No catching up. No punishment.</td></tr>
+            <tr><td>"I don't feel motivated"</td><td>Motivation is optional. Action is not.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="btn btn-p" style="margin-top:16px" onclick="goPh('ph-contract')">Continue →</button>
+    </div>
+
+    <div class="sph" id="ph-contract">
+      <div class="big-title">Burn<br>the Boats</div>
+      <div class="big-sub">You are not entering this casually. You are removing the option to retreat.</div>
+      <div class="cbox2">
+        <p>By starting this program, I acknowledge that:</p><br>
+        <p><strong>Every task must be completed as written.</strong> No substitutions, no modifications, no delays.</p><br>
+        <p><strong>Partial completion is failure.</strong></p><br>
+        <p><strong>Consequences are real.</strong> Miss 1 day: document it and add to end of week. Miss 2 days: complete a penalty challenge before continuing. Miss 3+ days or fall below the weekly threshold: restart the current week from Day 1.</p><br>
+        <p>Discomfort is expected. Resistance is expected. <strong>Neither is an excuse.</strong></p><br>
+        <p>Once I begin, there is no negotiating with who I used to be.</p>
+      </div>
+      <div class="slbl">The Discipline Protocol</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Act First</div><div class="rdsc">Action comes before motivation, clarity, or confidence.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Reduce, Don't Remove</div><div class="rdsc">If resistance is high, lower the intensity — never the consistency.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">No Make-Up Days</div><div class="rdsc">Miss a day? Continue immediately. No punishment.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Small Wins Count</div><div class="rdsc">Completing the minimum still reinforces discipline.</div></div></div>
+        <div class="rrow"><div class="rnum">—</div><div><div class="rtit">Finish the Day</div><div class="rdsc">The day is not over until your non-negotiables are done.</div></div></div>
+      </div>
+      <div class="slbl">The Ranks</div>
+      <div class="card" style="margin-bottom:16px">
+        <table class="rank-table">
+          <thead><tr><th>Days</th><th>Rank</th><th>What It Means</th></tr></thead>
+          <tbody>
+            <tr><td>Day 1</td><td class="rank-name">Landlubber</td><td>You've left the shore. No going back.</td></tr>
+            <tr><td>Day 7</td><td class="rank-name">Sailor</td><td>You survived the first week. Most don't.</td></tr>
+            <tr><td>Day 14</td><td class="rank-name">Buccaneer</td><td>Two weeks. The dip didn't take you.</td></tr>
+            <tr><td>Day 21</td><td class="rank-name">Corsair</td><td>Three weeks. Identity is shifting.</td></tr>
+            <tr><td>Day 30</td><td class="rank-name">Privateer</td><td>Thirty days. Proof of concept.</td></tr>
+            <tr><td>Day 60</td><td class="rank-name">Captain</td><td>Sixty days. The standard is permanent.</td></tr>
+            <tr><td>Day 90</td><td class="rank-name">Pirate King</td><td>Ninety days. You own the seas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="slbl">Sign Your Name</div>
+      <input type="text" id="sig" placeholder="Type your name to sign the contract">
+      <div id="sig-date" style="font-size:12px;color:var(--mu);margin-bottom:16px"></div>
+      <button class="btn btn-p" onclick="signBegin()">I Accept — Begin Day 1</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MAIN SCREEN
+═══════════════════════════════════ -->
+<div id="sc-main" class="screen">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div>
+        <div class="brand">BURN THE <span>BOATS</span></div>
+        <div class="day-ind" id="main-lbl">Day 1 of 30</div>
+      </div>
+      <button onclick="openAdmin()" style="background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
+    </div>
+    <div class="topbar-right"><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
+      <div class="rank-pill" id="rank-display">Landlubber</div>
+      <div class="streak">🔥 <span id="streak-n">0</span></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="swTab('today',this)">Today</div>
+    <div class="tab" onclick="swTab('week',this)">Week</div>
+    <div class="tab" onclick="swTab('program',this)">Program</div>
+  </div>
+
+  <!-- Backup Reminder Banner -->
+<div id="backup-banner" style="display:none;background:#1a1200;border-bottom:1px solid var(--am);padding:10px 16px;font-size:11px;color:var(--am2)">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <span>💾 Back up your progress — it's been 7+ days</span>
+    <div style="display:flex;gap:8px">
+      <button onclick="dismissBackup(true)" style="background:var(--am);color:#000;border:none;padding:4px 10px;border-radius:2px;font-size:10px;font-family:var(--fd);font-weight:700;cursor:pointer">BACKUP NOW</button>
+      <button onclick="dismissBackup(false)" style="background:transparent;color:var(--mu);border:none;font-size:16px;cursor:pointer;padding:0 4px">×</button>
+    </div>
+  </div>
+</div>
+
+<div id="tab-today" class="tab-panel active">
+    <div class="content">
+      <div class="slbl">Your Non-Negotiables</div>
+      <div id="t-nns"></div>
+      <div class="slbl" style="margin-top:16px">Today's Challenges</div>
+      <div id="t-chs"></div>
+      <div class="pw" style="margin-top:14px"><div class="pf" id="t-pf" style="width:0%"></div></div>
+      <div class="plbl" id="t-pl">0 of 0 complete</div>
+      <button class="btn btn-p" style="margin-top:16px" onclick="openDay(S.cd)">Open Today's Full Entry →</button>
+    </div>
+  </div>
+
+  <div id="tab-week" class="tab-panel">
+    <div class="content">
+      <div class="slbl">Week Stats</div>
+      <div class="sgrid">
+        <div class="scard"><div class="snum" id="w-nn">0</div><div class="slb">Non-Neg.</div></div>
+        <div class="scard"><div class="snum" id="w-ch">0</div><div class="slb">Challenges</div></div>
+        <div class="scard"><div class="snum" id="w-st">0</div><div class="slb">Streak</div></div>
+      </div>
+      <div class="slbl">Pass Thresholds</div>
+      <div id="w-thresh"></div>
+      <div class="slbl" style="margin-top:16px">Resistance This Week</div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--mu);margin-bottom:8px">Daily resistance scores (1=none, 10=overwhelming)</div>
+        <div class="resist-graph" id="resist-graph"></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--di);margin-top:4px" id="resist-days"></div>
+      </div>
+      <div class="slbl" style="margin-top:16px">This Week</div>
+      <div id="w-days"></div>
+      <div class="slbl" style="margin-top:16px">Week Debrief</div>
+      <div class="card">
+        <div class="rlbl">Which non-negotiable was hardest to maintain?</div>
+        <textarea id="db-hard" placeholder="Name it and explain why..." rows="2"></textarea>
+        <div class="rlbl">What excuse showed up most?</div>
+        <textarea id="db-exc" placeholder="Be honest..." rows="2"></textarea>
+        <div class="rlbl">What's the one thing you'll do differently next week?</div>
+        <textarea id="db-next" placeholder="One specific adjustment..." rows="2"></textarea>
+        <button class="btn-s" style="margin-top:12px" onclick="saveDB()">Save Debrief</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-program" class="tab-panel">
+    <div class="content">
+      <div class="slbl">All 30 Days</div>
+      <div id="prog-days"></div>
+      
+      <div style="margin-top:24px">
+        <div class="slbl">Data & Backup</div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6">
+            Your progress is saved to Firebase cloud and your device. 
+            Use the backup button to download a copy in case you ever need to restore.
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-s" style="flex:1;text-align:center" onclick="exportProgress()">↓ Download Backup</button>
+            <button class="btn-s" style="flex:1;text-align:center" onclick="triggerImport()">↑ Restore Backup</button>
+          </div>
+          <div style="margin-top:10px;font-size:10px;color:var(--di);line-height:1.5">
+            Download backup weekly. If you clear browser data, restore from your backup file.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     DAY VIEW SCREEN
+═══════════════════════════════════ -->
+<div id="sc-day" class="screen">
+  <button class="back-btn" onclick="showMain()">← Back</button>
+  <div class="content">
+    <div class="dh">
+      <div class="dhl" id="dv-lbl"></div>
+      <div class="dht" id="dv-tit"></div>
+      <div class="dhs" id="dv-sub"></div>
+    </div>
+
+    <!-- RESISTANCE METER -->
+    <div class="resist-wrap">
+      <div class="resist-q">Rate Your Resistance Right Now</div>
+      <div class="resist-val" id="resist-val">5</div>
+      <input type="range" class="resist-slider" id="resist-slider" min="1" max="10" value="5" oninput="updResist(this.value)">
+      <div class="resist-labels"><span>1 — None</span><span>5 — Moderate</span><span>10 — Overwhelming</span></div>
+    </div>
+
+    <div class="slbl">Reading</div>
+    <div class="rcard" id="dv-read"></div>
+
+    <div class="slbl" style="margin-top:16px">Daily Challenges</div>
+    <div id="dv-chs"></div>
+
+    <div class="slbl" style="margin-top:16px">Non-Negotiables</div>
+    <div id="dv-nns"></div>
+
+    <div class="div"></div>
+    <div style="font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">Daily Reflection</div>
+
+    <div class="rlbl">Did you complete all non-negotiables?</div>
+    <div class="ynr">
+      <button class="ynb" id="yn-y" onclick="setNNP(true)">✓ Yes — all done</button>
+      <button class="ynb" id="yn-n" onclick="setNNP(false)">✗ One or more missed</button>
+    </div>
+    <div id="nn-fail" style="display:none">
+      <div class="rlbl">Which failed — and what was the real reason?</div>
+      <textarea id="rf-fail" placeholder="Name the non-negotiable. Name the real reason..." rows="2"></textarea>
+      <div class="rlbl">What specifically prevents this tomorrow?</div>
+      <textarea id="rf-fix" placeholder="One concrete adjustment..." rows="2"></textarea>
+    </div>
+
+    <div class="rlbl">Which excuses showed up? (select all that apply)</div>
+    <div class="egrid" id="dv-exc"></div>
+
+    <div class="rlbl" id="identity-q-label">Did today's actions reflect who you are becoming?</div>
+    <textarea id="rf-id" placeholder="Connect today's actions to your identity..." rows="2"></textarea>
+
+    <div class="rlbl" id="deep-q-label" style="display:none"></div>
+    <textarea id="rf-deep" placeholder="" rows="2" style="display:none"></textarea>
+
+    <div class="rlbl">Notes</div>
+    <textarea id="rf-notes" placeholder="Anything else worth logging..." rows="3"></textarea>
+
+    <div style="margin-top:16px">
+      <button class="btn-g" onclick="getCoach()">✦ Get AI Coaching Feedback &nbsp;<span style="font-size:10px;opacity:.5">(coming soon)</span></button>
+      <div class="cout" id="coach-out"></div>
+    </div>
+    <button class="btn btn-p" style="margin-top:16px" onclick="compDay()">Save & Complete Day ✓</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// DATA
+// ═══════════════════════════════════
+
+const RANKS=[
+  {day:1,name:"Landlubber",msg:"You've left the shore. The boats are burning. There is no going back from this moment."},
+  {day:7,name:"Sailor",msg:"You survived the first week. Most people never make it here. The sea is yours now — learn to navigate it."},
+  {day:14,name:"Buccaneer",msg:"Two weeks. The dip tried to take you and failed. You are not the person who started Day 1."},
+  {day:21,name:"Corsair",msg:"Three weeks. Identity is shifting. You stop doing the program. You start being the person who does this."},
+  {day:30,name:"Privateer",msg:"Thirty days. This is the proof. Not that the program works — that YOU work. Now go again."},
+  {day:60,name:"Captain",msg:"Sixty days. The standard is permanent. The floor has been raised and it doesn't come back down."},
+  {day:90,name:"Pirate King",msg:"Ninety days. You own the seas. There is no version of your old life that can reach you here."},
+];
+
+function getRank(streak){
+  let r=RANKS[0];
+  for(let i=RANKS.length-1;i>=0;i--){if(streak>=RANKS[i].day){r=RANKS[i];break;}}
+  return r;
+}
+
+function isRankUp(day){
+  return RANKS.find(r=>r.day===day);
+}
+
+// WEEK-SPECIFIC REFLECTION PROMPTS
+const WEEK_PROMPTS={
+  1:[
+    {id:"id",q:"Did today's actions reflect who you are becoming?",ph:"Connect today's actions to your identity. Who showed up today?"},
+    {id:"deep",q:"Where did you negotiate with yourself today?",ph:"Be specific. What was the internal argument?"}
+  ],
+  2:[
+    {id:"id",q:"What would the old version of you have done today?",ph:"Be honest. What would they have chosen?"},
+    {id:"deep",q:"What excuse almost won today — and what did it cost you to reject it?",ph:"Name the excuse. Name the cost."}
+  ],
+  3:[
+    {id:"id",q:"List three decisions this week your old self couldn't have made.",ph:"Specific decisions. Specific moments."},
+    {id:"deep",q:"Where are you still performing discipline instead of living it?",ph:"The difference matters. Find it."}
+  ],
+  4:[
+    {id:"id",q:"Who are you right now? Not who you're becoming. Who are you now.",ph:"No hedging. No 'I'm working on it.' State it."},
+    {id:"deep",q:"What do you owe the next version of yourself?",ph:"Write what that person needs from you starting tomorrow."}
+  ]
+};
+
+const EXCUSES=['"I don\'t have time"','"I\'m too tired"','"I\'m not in the right mindset"','"I\'ll start tomorrow"','"I already messed up"','"I don\'t feel motivated"','"I\'m overwhelmed"','"I\'ll do it when I\'m ready"'];
+const WK_NAMES=["Foundation","Pressure Testing","Identity Shift","Proof"];
+const WK_THEMES=["Commitment, resistance, identity. Remove every retreat.","The program gets hard. You stay anyway.","You stop doing the program. You start being the person.","No motivation required. Finish what you started."];
+const WK_CLS=["wk1","wk2","wk3","wk4"];
+
+const DD=[
+  // ── WEEK 1: FOUNDATION ──
+  {w:1,t:"Burn the Boats",
+   r:`There is a difference between wanting change and committing to it.\n\nWanting leaves a way out. Commitment removes one.\n\nWhen the boats were burned, it wasn't a dramatic gesture. It was a strategic one. With no exit, every unit of energy pointed forward. The decision had already been made.\n\nThis program starts the same way. You are not here to test the water. You are in it.`,
+   q:"Once you begin, there is no negotiating with who you used to be.",
+   c:["50 push-ups — break into sets as needed","10-minute meditation — no phone, no music","Read 10 pages"]},
+  {w:1,t:"The Shore Disappears",
+   r:`Comfort doesn't disappear all at once. It fades slowly — then suddenly.\n\nRight now, the old shoreline is still visible. Old habits feel close enough to return to. That's exactly when resistance is strongest — when retreat still feels possible.\n\nToday's challenges exist to widen the gap. The farther you move, the quieter the pull becomes.`,
+   q:"Don't measure today by how you feel. Measure it by whether you moved.",
+   c:["60 push-ups — break into sets as needed","2-minute plank","Complete your hardest non-negotiable first"]},
+  {w:1,t:"Distance From Comfort",
+   r:`Comfort rarely disappears all at once.\n\nIt lingers. Old habits feel reachable. Familiar routines call quietly, promising relief without effort. This is where most people turn back — not because the path forward is impossible, but because the path backward feels easier.\n\nBut something else is happening beneath the surface. Every deliberate action is quietly reshaping who you are. You are not the same person who started Day 1.`,
+   q:"Progress today is measured by distance gained — not ease felt.",
+   c:["75 bodyweight squats — break into sets as needed","20-minute walk — no phone, no music","Read 15 pages"]},
+  {w:1,t:"The Cost of Negotiation",
+   r:`More energy is lost to internal negotiation than to effort itself.\n\nDebate drains momentum. Delay disguises itself as logic. The moment pressure rises, the mind starts searching for exceptions — not because they're necessary, but because they protect comfort.\n\nBurning the boats eliminates that search. When the decision is already made, energy goes to execution — not argument.`,
+   q:"Clarity is a performance advantage. Use it.",
+   c:["Run 1 mile","No phone after 7pm","Cold shower — 2 to 3 minutes"]},
+  {w:1,t:"One Direction",
+   r:`You cannot build a new life while holding onto the old one.\n\nHalf-commitment feels safer than full commitment. But it produces half-results — and half-results feel worse than no progress at all, because you can see what you're leaving behind.\n\nToday's challenges are designed to close that space. Less room to drift. Less room to revert.`,
+   q:"Pick a direction. Go fully. Progress accelerates when ambiguity is removed.",
+   c:["75 push-ups — break into sets as needed","30 minutes of focused work — one task only, no switching","Write 1 page: Who am I becoming?"]},
+  {w:1,t:"Quiet Work",
+   r:`Real discipline is built without an audience.\n\nNo announcements. No external validation. No immediate reward. Just repetition — day after day, whether it feels meaningful or not.\n\nToday's challenges are designed to feel unremarkable. That's the point. Consistency doesn't announce itself. It compounds silently.`,
+   q:"The results come later. The work happens now.",
+   c:["90 push-ups — break into sets as needed","No music during any task today","20-minute meditation — no phone, no music"]},
+  {w:1,t:"The First Test of Continuity",
+   r:`Starting is easy. Continuing is where most people disappear.\n\nFailure at this stage rarely comes from inability. It comes from underestimating how much showing up again — when nothing feels urgent, when the initial motivation has faded — actually matters.\n\nToday isn't a test of intensity. It's a test of reliability. The two are not the same.`,
+   q:"This is where the separation begins.",
+   c:["No phone for your first 4 hours","100 push-ups — break into sets as needed","Write 1 page: What am I grateful for?"]},
+
+  // ── WEEK 2: PRESSURE TESTING ──
+  {w:2,t:"When It Gets Hard",
+   r:`Nobody talks about what week two actually feels like.\n\nThe excitement of starting is gone. The finish line isn't visible yet. What's left is just the work — without the novelty, without the momentum, without the story you were telling yourself.\n\nThis is the week that separates people who want change from people who choose it. Hard days don't break discipline. They reveal it.`,
+   q:"Your real standard isn't what you do on your best days. It's what you do on days like today.",
+   c:["50 push-ups + 50 squats","15-minute journaling — no prompts, just write","2.5-minute plank"]},
+  {w:2,t:"The Dip",
+   r:`Every meaningful pursuit has a valley.\n\nIt comes after the initial rush fades and before the results become visible. It's the period where the old life is behind you and the new one hasn't fully arrived. Most people mistake the dip for a signal to quit. It isn't. It's a signal that you're in the right place.\n\nThe people who get through the dip don't avoid it. They expect it.`,
+   q:"The dip is not the end of the road. It's the price of admission.",
+   c:["Run 1.5 miles","No social media for the entire day","Read 20 pages"]},
+  {w:2,t:"Uncomfortable on Purpose",
+   r:`Discomfort is not a sign something is wrong. It's a sign something is changing.\n\nMost people spend their lives engineering around discomfort — softer seats, easier paths, smaller asks. That engineering is the trap. Every time you avoid discomfort, you confirm to yourself that you can't handle it. Every time you walk into it deliberately, you prove the opposite.\n\nToday you don't wait for discomfort to find you. You go find it.`,
+   q:"You don't build tolerance to hard things by avoiding them.",
+   c:["100 squats + 50 push-ups","Cold shower — 3 minutes, no easing in","Write 1 page: Where am I still avoiding discomfort?"]},
+  {w:2,t:"Who You Are When No One Watches",
+   r:`Identity isn't what you tell people you are. It's what you do when there's no audience.\n\nThe moment no one is watching is the moment that matters most. That's when the real standard is revealed — not the aspirational one, not the one you perform, but the one you actually live.\n\nDiscipline practiced in private is the only kind that holds. Everything else is theater.`,
+   q:"Character is who you are in the dark.",
+   c:["3-minute plank","No entertainment today — work, reflect, execute only","Sets of 20 push-ups every hour for 5 hours"]},
+  {w:2,t:"The Middle Is Where Most Quit",
+   r:`Week two is the hardest week of this program. Not because the challenges are the most difficult — but because the middle is where motivation collapses and only commitment is left.\n\nIf you are here, you are already past where most people stop. That is not an accident. That is a choice you made on every day that led to this one.\n\nDon't quit in the middle of your story.`,
+   q:"The middle is not a setback. It's a filter.",
+   c:["Run 2 miles","Write a letter to your future self — one year from today","20-minute meditation"]},
+  {w:2,t:"Controlled Chaos",
+   r:`Life will not pause for your discipline program.\n\nSchedules break. Emergencies happen. The day you planned becomes a day you survive. This is not a problem — it is the test. A discipline system that only works under perfect conditions isn't a system. It's a preference.\n\nToday you execute your non-negotiables under pressure. Whatever the day throws at you, the standard holds.`,
+   q:"Systems built in calm must be tested in chaos.",
+   c:["120 squats — break into sets as needed","Complete all non-negotiables before noon","Cold shower — 3 minutes"]},
+  {w:2,t:"Two Weeks In",
+   r:`Stop and look at what you've done.\n\nTwo weeks ago you made a decision. Not a wish, not a plan — a decision. And every day since, you've shown up. Some days were clean. Some were ugly. It doesn't matter. The showing up is what counts.\n\nYou are not the same person who signed that contract. Don't go back to being them.`,
+   q:"Two weeks of consistent action is more evidence than two years of intention.",
+   c:["No phone for your first 4 hours","Run 1 mile + 75 push-ups","Write 1 page: What's changed in two weeks?"]},
+
+  // ── WEEK 3: IDENTITY SHIFT ──
+  {w:3,t:"You Are Not the Same Person",
+   r:`Something has shifted.\n\nIt may not be dramatic. You may not feel like a new person. But look at the evidence: fourteen days of showing up, of doing the thing when you didn't want to, of choosing the standard over the feeling. That's not nothing. That's the beginning of an identity.\n\nProtect what you're building. The old version of you will try to come back. Don't let it.`,
+   q:"You are not who you were. Don't act like it.",
+   c:["15 dips + 40 push-ups + 50 squats","30-minute walk — no phone, no music","Read 20 pages"]},
+  {w:3,t:"Build the Evidence",
+   r:`Every day you complete is a vote for who you are.\n\nIdentity isn't declared. It's accumulated. It's built from small, consistent actions that stack over time until the pattern becomes undeniable — to you, and to everyone watching.\n\nYou don't need to announce who you're becoming. You need to keep building the evidence.`,
+   q:"The proof isn't what you say. It's what you do every single day.",
+   c:["Run 2 miles","3.5-minute plank","Write 1 page: What evidence do I have of my new identity?"]},
+  {w:3,t:"Standards Don't Take Days Off",
+   r:`Your standard is not conditional.\n\nIt doesn't lower when you're tired. It doesn't shift when the week is hard. It doesn't take Saturdays. A standard that bends to circumstances isn't a standard — it's a preference. And preferences dissolve when things get difficult.\n\nThe whole point of this program is to convert preferences into standards. That conversion happens today, regardless of how today feels.`,
+   q:"The day doesn't get to decide your standard. You do.",
+   c:["20 pike push-ups + 60 regular push-ups","No phone all morning","20-minute meditation"]},
+  {w:3,t:"The Compound Effect",
+   r:`Nothing dramatic has happened. Everything has changed.\n\nThat's what compounding looks like from the inside. No single day felt like a breakthrough. No single workout built the body. No single journal entry produced clarity. But the accumulation of all of them — quietly, invisibly — has been reshaping you.\n\nYou won't feel it until one day you look back and can't recognize where you started.`,
+   q:"The results are invisible until they're undeniable.",
+   c:["Run 2.5 miles","Cold shower — 3 minutes","Write 1 page: What is compounding in my life right now?"]},
+  {w:3,t:"Discipline Is Freedom",
+   r:`Most people think discipline is a constraint. They have it exactly backwards.\n\nThe person without discipline is the one who is trapped — by impulse, by distraction, by whoever or whatever demands their attention first. Structure is not a cage. It's what gives your day shape, your energy direction, and your life momentum.\n\nDiscipline is the thing that makes everything else possible.`,
+   q:"Freedom is not the absence of structure. It's the result of it.",
+   c:["50 push-ups + 50 squats + 20 dips","No social media today","Two 30-minute focused work blocks — no interruptions"]},
+  {w:3,t:"Protect the Streak",
+   r:`The streak is not the point. But it is evidence of the point.\n\nEvery unbroken day represents a moment when you could have stopped and didn't. A moment when the excuse was available and you rejected it. A moment when comfort called and you chose work instead.\n\nThe streak is a record of decisions. Protect it like it matters — because it does.`,
+   q:"Don't break the chain.",
+   c:["4-minute plank","Read 25 pages","Cold shower — 3 minutes"]},
+  {w:3,t:"Three Weeks In",
+   r:`Three weeks.\n\nMost people don't make it here. Not because they couldn't — because they didn't decide to. You decided. And you kept deciding, every morning, every time the resistance showed up, every day the dip tried to swallow you.\n\nYou are one week away from proof. Don't stop now.`,
+   q:"You didn't come this far to only come this far.",
+   c:["No phone for your first 4 hours","Run 2 miles + 50 push-ups","Write 1 page: Who have I become?"]},
+
+  // ── WEEK 4: PROOF ──
+  {w:4,t:"The Final Push",
+   r:`One week left. Same standard. No coasting.\n\nThis is where lesser programs tell you to celebrate, to reflect on your journey, to ease up. This program doesn't do that. The standard that got you here is the standard that finishes.\n\nWeek four is not the reward. Week four is the proof.`,
+   q:"You don't ease up at the end. You prove you never needed to.",
+   c:["10 burpees + 50 push-ups + 50 squats","Run 2.5 miles","Write 1 page: Why I don't quit"]},
+  {w:4,t:"Motivation Is Irrelevant",
+   r:`By now, you should notice something.\n\nThe motivation that launched you on Day 1 is largely gone. The excitement has faded. The novelty has worn off. And yet — here you are. Doing the work. Not because you feel like it. Because this is who you are now.\n\nThat is the whole point. That is what this program was building toward all along. Motivation was never the fuel. The system is the fuel.`,
+   q:"You don't need to feel like it. You just need to do it.",
+   c:["4-minute plank","Read 30 pages","No phone until noon"]},
+  {w:4,t:"Raise the Floor",
+   r:`Your worst day now would have been your best day 30 days ago.\n\nThat is what a raised floor looks like. Not a dramatic transformation — a quiet, permanent elevation of your minimum. The version of you that existed before this program could not have done what you've done this week. That version is gone.\n\nDon't lower the floor once the program ends.`,
+   q:"Raise the floor. The ceiling takes care of itself.",
+   c:["20 burpees + 60 push-ups + 40 squats","Cold shower — 3 minutes","20-minute meditation"]},
+  {w:4,t:"No Negotiation",
+   r:`The boats are gone. There is only forward.\n\nOn Day 1, burning the boats was a metaphor. By Day 27, it's a fact. There is no version of your life that includes going back to who you were before. That path no longer exists. You closed it, one day at a time, with every choice you made that your old self wouldn't have made.\n\nThere is nothing to negotiate with. There is only the work.`,
+   q:"The old version of you is no longer available.",
+   c:["Run 3 miles","Three 30-minute focused work blocks","Write 1 page: What I refuse to go back to"]},
+  {w:4,t:"Proof of Concept",
+   r:`You wanted proof that discipline could be built. Here it is.\n\nNot because a program told you to. Not because someone was watching. Because you made a decision and you honored it — through the dip, through the resistance, through the days you didn't want to show up but showed up anyway.\n\nYou were always capable of this. The program just removed every excuse you had for not doing it.`,
+   q:"You are the proof. You always were.",
+   c:["25 burpees + 50 push-ups + 50 squats","4.5-minute plank","Read 30 pages"]},
+  {w:4,t:"The Standard Remains",
+   r:`The program ends tomorrow. The standard doesn't.\n\nThis was never about 30 days. It was about what 30 days of consistent action would do to your identity — to the story you tell yourself about who you are and what you're capable of.\n\nThe program gave you a container. What you built inside it is yours. The question now is what you do with it.`,
+   q:"The program ends. The person it built doesn't.",
+   c:["Run 3 miles + 30 push-ups","Cold shower — 3 minutes","Write 1 page: What happens on Day 31?"]},
+  {w:4,t:"Day 30",
+   r:`You made it.\n\nThirty days. Every non-negotiable. Every challenge. Every reflection. Every day you didn't want to be here and showed up anyway.\n\nThis is not the end. This is the floor you stand on for the next 30 days, and the 30 after that. The work you did here is not the destination — it's the standard. Your standard now.\n\nWelcome to the other side. Now go again.`,
+   q:"The finish line is the starting line.",
+   c:["30 burpees + 100 push-ups","No phone — full morning","Write your mission statement for the next 30 days"]},
+];
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let S={started:false,sig:'',startDate:'',nns:[],cd:1,streak:0,days:{},debrief:{}};
+function load(callback){
+  // First load from localStorage immediately for instant display
+  try{const d=localStorage.getItem('btb30v2');if(d){const parsed=JSON.parse(d);if(parsed&&parsed.started)S=parsed;}}catch(e){}
+  
+  // Then try Firebase for latest cloud data
+  if(window.fbLoad){
+    window.fbLoad(function(data){
+      if(data && data.started) {
+        S=data;
+        // Also update localStorage with cloud data
+        try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
+      }
+      if(callback) callback();
+    });
+  } else {
+    if(callback) callback();
+  }
+}
+function save(){
+  // Always save to localStorage first as immediate backup
+  try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
+  // Then sync to Firebase
+  if(window.fbSave){ 
+    window.showSyncStatus&&window.showSyncStatus('saving'); 
+    window.fbSave(S); 
+    window.showSyncStatus&&setTimeout(()=>window.showSyncStatus('saved'),600); 
+  }
+}
+
+// ═══════════════════════════════════
+// SETUP
+// ═══════════════════════════════════
+function goPh(id){document.querySelectorAll('.sph').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function saveNNs(){
+  const v=['nn1','nn2','nn3','nn4','nn5'].map(id=>document.getElementById(id).value.trim()).filter(Boolean);
+  if(v.length<3){alert('Please enter at least 3 non-negotiables.');return;}
+  S.nns=v;save();goPh('ph-resistance');
+}
+
+function signBegin(){
+  const s=document.getElementById('sig').value.trim();
+  if(!s){alert('Please sign your name.');return;}
+  S.sig=s;S.startDate=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  S.started=true;
+  // Save to localStorage immediately
+  try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
+  // Save to Firebase
+  if(window.fbSave){window.fbSave(S);}
+  showMain();
+  // Save again after 1 second to make sure Firebase got it
+  setTimeout(function(){
+    try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
+    if(window.fbSave){window.fbSave(S);}
+  }, 1000);
+}
+
+// ═══════════════════════════════════
+// MAIN
+// ═══════════════════════════════════
+function showMain(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-main').classList.add('active');
+  document.getElementById('streak-n').textContent=S.streak;
+  const rank=getRank(S.streak);
+  document.getElementById('rank-display').textContent=rank.name;
+  const wk=Math.ceil(S.cd/7);
+  document.getElementById('main-lbl').textContent='Day '+S.cd+' of 30 · Week '+wk+': '+WK_NAMES[wk-1];
+  renderToday();renderWeek();renderProgram();window.scrollTo(0,0);checkBackupReminder();
+}
+
+function swTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ═══════════════════════════════════
+// TODAY TAB
+// ═══════════════════════════════════
+function renderToday(){
+  const d=S.cd;const sd=S.days[d]||{};
+  const ne=document.getElementById('t-nns');ne.innerHTML='';
+  S.nns.forEach((nn,i)=>{
+    const done=sd.nnDone&&sd.nnDone[i];
+    const el=mkCI(nn,done,()=>{togNN(d,i);renderToday();});
+    ne.appendChild(el);
+  });
+  const ce=document.getElementById('t-chs');ce.innerHTML='';
+  DD[d-1].c.forEach((ch,i)=>{
+    const done=sd.chDone&&sd.chDone[i];
+    const el=mkCI(ch,done,()=>{togCH(d,i);renderToday();});
+    ce.appendChild(el);
+  });
+  updProg(d);
+}
+
+function mkCI(txt,done,cb){
+  const el=document.createElement('div');
+  el.className='ci'+(done?' done':'');
+  el.innerHTML=`<div class="cbox">${done?'✓':''}</div><div class="ctext">${txt}</div>`;
+  el.onclick=cb;return el;
+}
+
+function togNN(d,i){if(!S.days[d])S.days[d]={};if(!S.days[d].nnDone)S.days[d].nnDone={};S.days[d].nnDone[i]=!S.days[d].nnDone[i];save();}
+function togCH(d,i){if(!S.days[d])S.days[d]={};if(!S.days[d].chDone)S.days[d].chDone={};S.days[d].chDone[i]=!S.days[d].chDone[i];save();}
+
+function updProg(d){
+  const sd=S.days[d]||{};const nt=S.nns.length;const ct=3;
+  const nd=Object.values(sd.nnDone||{}).filter(Boolean).length;
+  const cd2=Object.values(sd.chDone||{}).filter(Boolean).length;
+  const tot=nt+ct;const don=nd+cd2;const p=tot?Math.round(don/tot*100):0;
+  document.getElementById('t-pf').style.width=p+'%';
+  document.getElementById('t-pl').textContent=don+' of '+tot+' complete';
+}
+
+// ═══════════════════════════════════
+// WEEK TAB
+// ═══════════════════════════════════
+function renderWeek(){
+  const wk=Math.ceil(S.cd/7);const ws=(wk-1)*7+1;const we=Math.min(wk*7,30);
+  const nnPD=S.nns.length;const maxNN=nnPD*7;const maxCH=21;
+  let tNN=0,tCH=0;
+  for(let d=ws;d<=we;d++){const sd=S.days[d]||{};tNN+=Object.values(sd.nnDone||{}).filter(Boolean).length;tCH+=Object.values(sd.chDone||{}).filter(Boolean).length;}
+  document.getElementById('w-nn').textContent=tNN;
+  document.getElementById('w-ch').textContent=tCH;
+  document.getElementById('w-st').textContent=S.streak;
+  const nnTh=Math.floor(maxNN*0.86);const nnP=tNN>=nnTh;const chP=tCH>=18;
+  document.getElementById('w-thresh').innerHTML=`<div class="tr ${nnP?'pass':'fail'}">${nnP?'✓':'✗'} Non-negotiables: ${tNN} / ${maxNN} (need ${nnTh}+)</div><div class="tr ${chP?'pass':'fail'}">${chP?'✓':'✗'} Challenges: ${tCH} / ${maxCH} (need 18+)</div>`;
+
+  // Resistance graph
+  const rg=document.getElementById('resist-graph');const rd=document.getElementById('resist-days');
+  rg.innerHTML='';rd.innerHTML='';
+  for(let d=ws;d<=we;d++){
+    const sd=S.days[d]||{};const r=sd.resist||0;
+    const bar=document.createElement('div');
+    bar.className='rg-bar'+(r===0?' empty':'');
+    bar.style.height=(r===0?8:Math.round(r/10*56)+4)+'px';
+    bar.title='Day '+d+': '+(r||'not logged');
+    rg.appendChild(bar);
+    const lbl=document.createElement('span');lbl.textContent=d;rd.appendChild(lbl);
+  }
+
+  const wd=document.getElementById('w-days');wd.innerHTML='';
+  for(let d=ws;d<=we;d++){
+    const sd=S.days[d]||{};const locked=d>S.cd;const comp=sd.completed;const isT=d===S.cd;
+    const dc=document.createElement('div');
+    dc.className='dc'+(comp?' completed':'')+(isT&&!comp?' is-today':'')+(locked?' locked':'');
+    const nd=Object.values(sd.nnDone||{}).filter(Boolean).length;
+    const cd2=Object.values(sd.chDone||{}).filter(Boolean).length;
+    dc.innerHTML=`<div class="dci"><div class="dn">${d<10?'0'+d:d}</div><div class="dic"><div class="dct">${DD[d-1].t}</div><div class="dcm">${comp?'Completed ✓':isT?'In progress · '+nd+'/'+nnPD+' NN · '+cd2+'/3 ch':locked?'Locked':'Past'}</div></div><div class="dico">${comp?'✓':locked?'🔒':'→'}</div></div>`;
+    if(!locked)dc.onclick=()=>openDay(d);wd.appendChild(dc);
+  }
+
+  const db=S.debrief[wk]||{};
+  document.getElementById('db-hard').value=db.hard||'';
+  document.getElementById('db-exc').value=db.exc||'';
+  document.getElementById('db-next').value=db.next||'';
+}
+
+function saveDB(){
+  const wk=Math.ceil(S.cd/7);
+  if(!S.debrief)S.debrief={};
+  S.debrief[wk]={hard:document.getElementById('db-hard').value,exc:document.getElementById('db-exc').value,next:document.getElementById('db-next').value};
+  save();const b=event.target;b.textContent='Saved ✓';b.style.color='var(--gn)';b.style.borderColor='var(--gn)';
+  setTimeout(()=>{b.textContent='Save Debrief';b.style.color='';b.style.borderColor='';},2000);
+}
+
+// ═══════════════════════════════════
+// PROGRAM TAB
+// ═══════════════════════════════════
+function renderProgram(){
+  const el=document.getElementById('prog-days');el.innerHTML='';
+  let curWk=0;
+  DD.forEach((d,i)=>{
+    const wk=d.w;const dayN=i+1;
+    if(wk!==curWk){
+      curWk=wk;
+      const ph=document.createElement('div');ph.className='phase-hdr';
+      ph.innerHTML=`<div><div class="phase-name">Week ${wk}: ${WK_NAMES[wk-1]} <span class="wk-badge ${WK_CLS[wk-1]}">Week ${wk}</span></div><div class="phase-theme">${WK_THEMES[wk-1]}</div></div>`;
+      el.appendChild(ph);
+    }
+    const locked=dayN>S.cd;const comp=S.days[dayN]&&S.days[dayN].completed;const isT=dayN===S.cd;
+    const dc=document.createElement('div');
+    dc.className='dc'+(comp?' completed':'')+(isT&&!comp?' is-today':'')+(locked?' locked':'');
+    dc.innerHTML=`<div class="dci"><div class="dn">${dayN<10?'0'+dayN:dayN}</div><div class="dic"><div class="dct">${d.t}</div><div class="dcm" style="font-size:10px">${d.c.join(' · ')}</div></div><div class="dico">${comp?'✓':locked?'🔒':'→'}</div></div>`;
+    if(!locked)dc.onclick=()=>openDay(dayN);el.appendChild(dc);
+  });
+}
+
+// ═══════════════════════════════════
+// DAY VIEW
+// ═══════════════════════════════════
+let aDay=1;
+
+function updResist(v){
+  document.getElementById('resist-val').textContent=v;
+  if(!S.days[aDay])S.days[aDay]={};
+  S.days[aDay].resist=parseInt(v);save();
+}
+
+function openDay(dn){
+  aDay=dn;const d=DD[dn-1];const sd=S.days[dn]||{};const wk=d.w;
+  document.getElementById('dv-lbl').textContent='Day '+dn+' / 30 · Week '+wk+': '+WK_NAMES[wk-1];
+  document.getElementById('dv-tit').textContent=d.t;
+  document.getElementById('dv-sub').textContent='Week '+wk+' · '+WK_NAMES[wk-1]+' · '+d.c.length+' challenges today';
+
+  // Resistance
+  const rv=sd.resist||5;
+  document.getElementById('resist-slider').value=rv;
+  document.getElementById('resist-val').textContent=rv;
+
+  // Reading
+  document.getElementById('dv-read').innerHTML=d.r.split('\n\n').map(p=>`<p style="font-size:14px;line-height:1.8;color:#ccc;margin-bottom:10px">${p}</p>`).join('')+`<div class="pquote">"${d.q}"</div>`;
+
+  // Challenges
+  const ce=document.getElementById('dv-chs');ce.innerHTML='';
+  d.c.forEach((ch,i)=>{
+    const done=sd.chDone&&sd.chDone[i];
+    const el=document.createElement('div');el.className='ci'+(done?' done':'');
+    el.innerHTML=`<div class="cbox">${done?'✓':''}</div><div class="ctext">${ch}</div>`;
+    el.onclick=()=>{togCH(dn,i);el.className='ci'+(S.days[dn].chDone[i]?' done':'');el.querySelector('.cbox').textContent=S.days[dn].chDone[i]?'✓':'';el.querySelector('.ctext').style.textDecoration=S.days[dn].chDone[i]?'line-through':'none';el.querySelector('.ctext').style.color=S.days[dn].chDone[i]?'var(--mu)':'';};
+    ce.appendChild(el);
+  });
+
+  // NNs
+  const ne=document.getElementById('dv-nns');ne.innerHTML='';
+  S.nns.forEach((nn,i)=>{
+    const done=sd.nnDone&&sd.nnDone[i];
+    const el=document.createElement('div');el.className='ci'+(done?' done':'');
+    el.innerHTML=`<div class="cbox">${done?'✓':''}</div><div class="ctext">${nn}</div>`;
+    el.onclick=()=>{togNN(dn,i);el.className='ci'+(S.days[dn].nnDone[i]?' done':'');el.querySelector('.cbox').textContent=S.days[dn].nnDone[i]?'✓':'';el.querySelector('.ctext').style.textDecoration=S.days[dn].nnDone[i]?'line-through':'none';el.querySelector('.ctext').style.color=S.days[dn].nnDone[i]?'var(--mu)':'';};
+    ne.appendChild(el);
+  });
+
+  // Reflection
+  const nnP=sd.nnPass;
+  document.getElementById('yn-y').className='ynb'+(nnP===true?' ysel':'');
+  document.getElementById('yn-n').className='ynb'+(nnP===false?' nsel':'');
+  document.getElementById('nn-fail').style.display=nnP===false?'block':'none';
+  document.getElementById('rf-fail').value=sd.rfFail||'';
+  document.getElementById('rf-fix').value=sd.rfFix||'';
+  document.getElementById('rf-id').value=sd.rfId||'';
+  document.getElementById('rf-deep').value=sd.rfDeep||'';
+  document.getElementById('rf-notes').value=sd.rfNotes||'';
+
+  // Week-specific prompts
+  const prompts=WEEK_PROMPTS[wk];
+  document.getElementById('identity-q-label').textContent=prompts[0].q;
+  document.getElementById('rf-id').placeholder=prompts[0].ph;
+  if(prompts[1]){
+    document.getElementById('deep-q-label').textContent=prompts[1].q;
+    document.getElementById('deep-q-label').style.display='block';
+    document.getElementById('rf-deep').placeholder=prompts[1].ph;
+    document.getElementById('rf-deep').style.display='block';
+  }
+
+  // Excuses
+  const eg=document.getElementById('dv-exc');eg.innerHTML='';
+  EXCUSES.forEach((ex,i)=>{
+    const sel=sd.excuses&&sd.excuses[i];
+    const b=document.createElement('div');b.className='ebtn'+(sel?' sel':'');b.textContent=ex;
+    b.onclick=()=>{if(!S.days[aDay])S.days[aDay]={};if(!S.days[aDay].excuses)S.days[aDay].excuses={};S.days[aDay].excuses[i]=!S.days[aDay].excuses[i];save();b.className='ebtn'+(S.days[aDay].excuses[i]?' sel':'');};
+    eg.appendChild(b);
+  });
+
+  document.getElementById('coach-out').style.display='none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-day').classList.add('active');window.scrollTo(0,0);
+}
+
+function setNNP(v){
+  if(!S.days[aDay])S.days[aDay]={};S.days[aDay].nnPass=v;save();
+  document.getElementById('yn-y').className='ynb'+(v===true?' ysel':'');
+  document.getElementById('yn-n').className='ynb'+(v===false?' nsel':'');
+  document.getElementById('nn-fail').style.display=v===false?'block':'none';
+}
+
+function compDay(){
+  if(!S.days[aDay])S.days[aDay]={};
+  S.days[aDay].rfFail=document.getElementById('rf-fail').value;
+  S.days[aDay].rfFix=document.getElementById('rf-fix').value;
+  S.days[aDay].rfId=document.getElementById('rf-id').value;
+  S.days[aDay].rfDeep=document.getElementById('rf-deep').value;
+  S.days[aDay].rfNotes=document.getElementById('rf-notes').value;
+  S.days[aDay].completed=true;
+
+  const wasCurrentDay=aDay===S.cd;
+  if(wasCurrentDay&&aDay<30){S.cd=aDay+1;S.streak++;}
+  else if(wasCurrentDay){S.streak++;}
+  save();
+
+  // Check for rank up or milestone
+  if(wasCurrentDay){
+    const rankUp=isRankUp(aDay);
+    showCeremony(aDay,S.streak,rankUp);
+  } else {
+    showMain();
+  }
+}
+
+// ═══════════════════════════════════
+// CEREMONY
+// ═══════════════════════════════════
+function showCeremony(dayNum,streak,rankUp){
+  document.getElementById('cer-day').textContent=dayNum;
+  document.getElementById('cer-streak').textContent='STREAK: '+streak+'🔥';
+  if(rankUp){
+    document.getElementById('cer-rank-label').textContent='YOU HAVE EARNED THE RANK OF';
+    document.getElementById('cer-rank').textContent=rankUp.name;
+    document.getElementById('cer-msg').textContent=rankUp.msg;
+  } else {
+    const rank=getRank(streak);
+    document.getElementById('cer-rank-label').textContent='CURRENT RANK';
+    document.getElementById('cer-rank').textContent=rank.name;
+    document.getElementById('cer-msg').textContent='Day '+dayNum+' complete. The standard holds.';
+  }
+  if(dayNum<30){
+    const next=DD[dayNum];
+    document.getElementById('cer-preview-txt').textContent='"'+next.q+'"';
+  } else {
+    document.getElementById('cer-preview-txt').textContent='You have completed the 30-Day Protocol. Welcome to the other side.';
+  }
+  document.getElementById('ceremony').classList.add('show');
+}
+
+function closeCeremony(){
+  document.getElementById('ceremony').classList.remove('show');
+  showMain();
+}
+
+function getCoach(){
+  const o=document.getElementById('coach-out');o.style.display='block';
+  o.innerHTML='Connecting to AI coaching...';
+  setTimeout(()=>{o.innerHTML='AI coaching feedback connects to the Anthropic API in the full release. It will read your reflection, reference your past entries, and respond like a no-BS coach — calling out patterns, naming the real resistance, giving you one clear action for tomorrow.';},1200);
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('sig-date');
+  if(el)el.textContent='Date: '+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  
+  // Load data - check localStorage first, then Firebase
+  // Try immediate localStorage load
+  try{const d=localStorage.getItem('btb30v2');if(d){const parsed=JSON.parse(d);if(parsed&&parsed.started){S=parsed;showMain();}}}catch(e){}
+  
+  // Then load from Firebase and update if needed
+  setTimeout(function(){
+    load(function(){
+      if(S.started){
+        showMain();
+        if(window.fbListen) window.fbListen();
+      }
+    });
+  }, 500);
+});
+</script>
+
+<!-- ═══════════════════════════════════
+     ADMIN DASHBOARD SCREEN
+═══════════════════════════════════ -->
+<div id="sc-admin" class="screen">
+  <button class="back-btn" onclick="showMain()">← Back</button>
+  <div class="content">
+    <div class="dh">
+      <div class="dhl">CONTENT MANAGEMENT</div>
+      <div class="dht">Admin Dashboard</div>
+      <div class="dhs">Edit any day's content and push updates to all testers instantly</div>
+    </div>
+
+    <div class="slbl">Select Day to Edit</div>
+    <div id="admin-day-list"></div>
+
+    <div id="admin-editor" style="display:none;margin-top:20px">
+      <div class="slbl" id="admin-edit-label">Editing Day —</div>
+      
+      <div class="slbl" style="margin-top:14px">Day Title</div>
+      <input type="text" id="admin-title" placeholder="Day title...">
+      
+      <div class="slbl" style="margin-top:10px">Reading</div>
+      <textarea id="admin-reading" rows="8" placeholder="Day reading text..." style="min-height:140px"></textarea>
+      
+      <div class="slbl" style="margin-top:10px">Pull Quote</div>
+      <input type="text" id="admin-quote" placeholder="Pull quote (without quotes)...">
+      
+      <div class="slbl" style="margin-top:10px">Challenge 1</div>
+      <input type="text" id="admin-c1" placeholder="Challenge 1...">
+      
+      <div class="slbl" style="margin-top:6px">Challenge 2</div>
+      <input type="text" id="admin-c2" placeholder="Challenge 2...">
+      
+      <div class="slbl" style="margin-top:6px">Challenge 3</div>
+      <input type="text" id="admin-c3" placeholder="Challenge 3...">
+
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-p" style="flex:2" onclick="pushContentUpdate()">Push Update to All Testers ↑</button>
+        <button class="btn-s" style="flex:1" onclick="resetDayContent()">Reset to Original</button>
+      </div>
+      <div id="admin-status" style="font-size:11px;color:var(--gn);letter-spacing:1px;text-align:center;margin-top:8px;min-height:16px"></div>
+    </div>
+
+    <div style="margin-top:24px">
+      <div class="slbl">Live Tester Activity</div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Connected testers and their current day</div>
+        <div id="admin-tester-list"><div style="font-size:12px;color:var(--di)">No tester activity yet</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="slbl">Quick Stats</div>
+      <div class="sgrid">
+        <div class="scard"><div class="snum" id="admin-total-users">—</div><div class="slb">Testers</div></div>
+        <div class="scard"><div class="snum" id="admin-avg-day">—</div><div class="slb">Avg Day</div></div>
+        <div class="scard"><div class="snum" id="admin-completions">—</div><div class="slb">Completions</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
