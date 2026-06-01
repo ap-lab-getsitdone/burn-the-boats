@@ -211,56 +211,47 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   // ── AUTH-BASED USER ID ──
   let UID = null;
   const userRef = () => ref(db, 'users/' + UID);
-  
-  // Auth state listener
+
+  // Auth state change handler
   onAuthStateChanged(auth, (user) => {
     if (user) {
       UID = user.uid;
-      console.log('Signed in. User ID:', UID);
-      // Hide auth screen, load data
+      console.log('Signed in:', UID);
       document.getElementById('sc-auth').classList.remove('active');
       load(function(){
         if(window.S && window.S.started){
           showMain();
           if(window.fbListen) window.fbListen();
         } else {
-          // New user — show setup
           document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
           document.getElementById('sc-setup').classList.add('active');
         }
       });
     } else {
       UID = null;
-      // Show auth screen
       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
       document.getElementById('sc-auth').classList.add('active');
     }
   });
 
-  // ── AUTH FUNCTIONS ──
-  window.fbSignUp = function(email, password, callback) {
+  window.fbSignUp = function(email, password, cb) {
     createUserWithEmailAndPassword(auth, email, password)
-      .then((cred) => { callback(null, cred.user); })
-      .catch((err) => { callback(err.message); });
+      .then(cred => cb(null, cred.user))
+      .catch(err => cb(err.message));
   };
-
-  window.fbSignIn = function(email, password, callback) {
+  window.fbSignIn = function(email, password, cb) {
     signInWithEmailAndPassword(auth, email, password)
-      .then((cred) => { callback(null, cred.user); })
-      .catch((err) => { callback(err.message); });
+      .then(cred => cb(null, cred.user))
+      .catch(err => cb(err.message));
   };
-
   window.fbSignOut = function() {
     signOut(auth).then(() => {
       window.S = {started:false,sig:'',startDate:'',nns:[],cd:1,streak:0,days:{},debrief:{}};
       try{localStorage.removeItem('btb30v2');}catch(e){}
     });
   };
-
-  window.fbResetPassword = function(email, callback) {
-    sendPasswordResetEmail(auth, email)
-      .then(() => callback(null))
-      .catch((err) => callback(err.message));
+  window.fbResetPassword = function(email, cb) {
+    sendPasswordResetEmail(auth, email).then(()=>cb(null)).catch(err=>cb(err.message));
   };
 
   // ── FIREBASE SAVE (replaces localStorage save) ──
@@ -442,52 +433,6 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   <button class="btn btn-p" style="max-width:280px" onclick="closeCeremony()">Continue →</button>
 </div>
 
-
-<!-- ═══════════════════════════════════
-     AUTH SCREEN
-═══════════════════════════════════ -->
-<div id="sc-auth" class="screen active">
-  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;background:var(--bg)">
-    
-    <div style="font-family:var(--fd);font-weight:900;font-size:32px;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px">BURN THE <span style="color:var(--rd)">BOATS</span></div>
-    <div style="font-size:11px;color:var(--mu);letter-spacing:3px;text-transform:uppercase;margin-bottom:40px">30-Day Discipline Protocol</div>
-
-    <!-- Tab Toggle -->
-    <div style="display:flex;width:100%;max-width:400px;margin-bottom:24px;background:var(--s1);border-radius:3px;border:1px solid var(--b1)">
-      <button id="tab-signin-btn" onclick="switchAuthTab('signin')" ontouchend="switchAuthTab('signin')" style="flex:1;padding:16px 12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:3px 0 0 3px;cursor:pointer;background:var(--rd);color:white;-webkit-tap-highlight-color:transparent;touch-action:manipulation">Sign In</button>
-      <button id="tab-signup-btn" onclick="switchAuthTab('signup')" ontouchend="switchAuthTab('signup')" style="flex:1;padding:16px 12px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:0 3px 3px 0;cursor:pointer;background:transparent;color:var(--mu);-webkit-tap-highlight-color:transparent;touch-action:manipulation">Create Account</button>
-    </div>
-
-    <div style="width:100%;max-width:400px">
-      
-      <!-- Sign In Form -->
-      <div id="form-signin">
-        <input type="email" id="signin-email" placeholder="Email address" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
-        <input type="password" id="signin-password" placeholder="Password" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:16px">
-        <button onclick="handleSignIn()" ontouchend="handleSignIn()" class="btn btn-p" style="width:100%;margin-bottom:12px;padding:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Sign In →</button>
-        <div style="text-align:center">
-          <button onclick="handleForgotPassword()" style="background:none;border:none;color:var(--mu);font-size:12px;cursor:pointer;font-family:var(--fb);text-decoration:underline">Forgot password?</button>
-        </div>
-      </div>
-
-      <!-- Sign Up Form -->
-      <div id="form-signup" style="display:none">
-        <input type="email" id="signup-email" placeholder="Email address" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
-        <input type="password" id="signup-password" placeholder="Create password (6+ characters)" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:10px">
-        <input type="password" id="signup-confirm" placeholder="Confirm password" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:14px;padding:13px 14px;margin-bottom:16px">
-        <button onclick="handleSignUp()" ontouchend="handleSignUp()" class="btn btn-p" style="width:100%;padding:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent">Create Account →</button>
-      </div>
-
-      <!-- Error/Status Message -->
-      <div id="auth-msg" style="margin-top:14px;font-size:12px;text-align:center;min-height:18px;color:var(--rd2)"></div>
-    </div>
-
-    <div style="margin-top:40px;font-size:10px;color:var(--di);text-align:center;line-height:1.6">
-      Your account syncs your progress across all devices.<br>One login. Phone, laptop, tablet — all connected.
-    </div>
-  </div>
-</div>
-
 <!-- ═══════════════════════════════════
      SETUP SCREEN
 ═══════════════════════════════════ -->
@@ -616,7 +561,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       </div>
       <button onclick="openAdmin()" style="background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
     </div>
-    <div class="topbar-right"><button onclick="handleSignOut()" style="background:transparent;border:none;color:var(--mu);font-size:10px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;margin-right:4px">SIGN OUT</button><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
+    <div class="topbar-right"><button onclick="doSignOut()" style="background:transparent;border:1px solid var(--b2);color:var(--mu);font-size:9px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:2px;margin-right:4px">SIGN OUT</button><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
       <div class="rank-pill" id="rank-display">Landlubber</div>
       <div class="streak">🔥 <span id="streak-n">0</span></div>
     </div>
@@ -1289,13 +1234,7 @@ function getCoach(){
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('sig-date');
   if(el)el.textContent='Date: '+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  // Auth state listener in Firebase module handles everything
-  // If Firebase fails to load, fall back to local
-  setTimeout(function(){
-    if(!window.firebaseReady){
-      try{const d=localStorage.getItem('btb30v2');if(d){const parsed=JSON.parse(d);if(parsed&&parsed.started){S=parsed;showMain();}}}catch(e){}
-    }
-  }, 3000);
+  // Auth state listener handles navigation
 });
 </script>
 
@@ -1360,6 +1299,165 @@ document.addEventListener('DOMContentLoaded',()=>{
     </div>
   </div>
 </div>
+
+
+<!-- AUTH SCREEN -->
+<div id="sc-auth" class="screen active">
+<style>
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;background:var(--bg)}
+.auth-title{font-family:var(--fd);font-weight:900;font-size:32px;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
+.auth-sub{font-size:11px;color:var(--mu);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px}
+.auth-box{width:100%;max-width:400px}
+.auth-tabs{display:flex;margin-bottom:20px;border:1px solid var(--b1);border-radius:3px;overflow:hidden}
+.auth-tab{flex:1;padding:15px;font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;text-align:center;cursor:pointer;transition:all .15s;user-select:none}
+.auth-tab.active{background:var(--rd);color:white}
+.auth-tab.inactive{background:transparent;color:var(--mu)}
+.auth-input{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:16px;padding:15px 14px;margin-bottom:10px;box-sizing:border-box;-webkit-appearance:none}
+.auth-btn{width:100%;padding:17px;background:var(--rd);color:white;border:none;border-radius:2px;font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:6px;display:block;-webkit-appearance:none}
+.auth-btn:active{background:var(--rd2)}
+.auth-link{background:none;border:none;color:var(--mu);font-size:12px;cursor:pointer;font-family:var(--fb);text-decoration:underline;padding:10px;display:block;margin:8px auto 0;text-align:center}
+.auth-msg{margin-top:12px;font-size:12px;text-align:center;min-height:18px;padding:0 10px;line-height:1.5}
+.auth-footer{margin-top:32px;font-size:10px;color:var(--di);text-align:center;line-height:1.8}
+</style>
+<div class="auth-wrap">
+  <div class="auth-title">BURN THE <span style="color:var(--rd)">BOATS</span></div>
+  <div class="auth-sub">30-Day Discipline Protocol</div>
+  <div class="auth-box">
+    <div class="auth-tabs">
+      <div id="atab-signin" class="auth-tab active" data-tab="signin">Sign In</div>
+      <div id="atab-signup" class="auth-tab inactive" data-tab="signup">Create Account</div>
+    </div>
+    <div id="aform-signin">
+      <input class="auth-input" type="email" id="a-signin-email" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" type="password" id="a-signin-pass" placeholder="Password" autocomplete="current-password" style="margin-bottom:16px">
+      <button class="auth-btn" id="a-btn-signin">SIGN IN →</button>
+      <button class="auth-link" id="a-btn-forgot">Forgot password?</button>
+    </div>
+    <div id="aform-signup" style="display:none">
+      <input class="auth-input" type="email" id="a-signup-email" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" type="password" id="a-signup-pass" placeholder="Create password (6+ characters)" autocomplete="new-password">
+      <input class="auth-input" type="password" id="a-signup-confirm" placeholder="Confirm password" autocomplete="new-password" style="margin-bottom:16px">
+      <button class="auth-btn" id="a-btn-signup">CREATE ACCOUNT →</button>
+    </div>
+    <div class="auth-msg" id="a-msg"></div>
+  </div>
+  <div class="auth-footer">Your account syncs your progress across all devices.<br>One login. Phone, laptop, tablet — all connected.</div>
+</div>
+</div>
+
+<script>
+// ── AUTH UI ──
+(function(){
+  function showMsg(txt, isError) {
+    var el = document.getElementById('a-msg');
+    if(!el) return;
+    el.textContent = txt;
+    el.style.color = isError ? 'var(--rd2)' : 'var(--gn)';
+  }
+
+  function switchTab(tab) {
+    var signin = document.getElementById('aform-signin');
+    var signup = document.getElementById('aform-signup');
+    var tabS = document.getElementById('atab-signin');
+    var tabU = document.getElementById('atab-signup');
+    if(!signin || !signup) return;
+    if(tab === 'signin') {
+      signin.style.display = 'block';
+      signup.style.display = 'none';
+      tabS.className = 'auth-tab active';
+      tabU.className = 'auth-tab inactive';
+    } else {
+      signin.style.display = 'none';
+      signup.style.display = 'block';
+      tabS.className = 'auth-tab inactive';
+      tabU.className = 'auth-tab active';
+    }
+    showMsg('', false);
+  }
+
+  function doSignIn() {
+    var email = document.getElementById('a-signin-email').value.trim();
+    var pass = document.getElementById('a-signin-pass').value;
+    if(!email || !pass) { showMsg('Please enter your email and password.', true); return; }
+    showMsg('Signing in...', false);
+    window.fbSignIn(email, pass, function(err) {
+      if(err) {
+        if(err.indexOf('invalid-credential') > -1 || err.indexOf('wrong-password') > -1 || err.indexOf('user-not-found') > -1) {
+          showMsg('Incorrect email or password.', true);
+        } else if(err.indexOf('invalid-email') > -1) {
+          showMsg('Please enter a valid email address.', true);
+        } else {
+          showMsg('Sign in failed. Please try again.', true);
+        }
+      } else {
+        showMsg('Signed in. Loading your progress...', false);
+      }
+    });
+  }
+
+  function doSignUp() {
+    var email = document.getElementById('a-signup-email').value.trim();
+    var pass = document.getElementById('a-signup-pass').value;
+    var confirm = document.getElementById('a-signup-confirm').value;
+    if(!email || !pass) { showMsg('Please fill in all fields.', true); return; }
+    if(pass !== confirm) { showMsg('Passwords do not match.', true); return; }
+    if(pass.length < 6) { showMsg('Password must be at least 6 characters.', true); return; }
+    showMsg('Creating your account...', false);
+    window.fbSignUp(email, pass, function(err) {
+      if(err) {
+        if(err.indexOf('email-already-in-use') > -1) {
+          showMsg('Account already exists. Sign in instead.', true);
+        } else {
+          showMsg('Could not create account. Please try again.', true);
+        }
+      } else {
+        showMsg('Account created! Setting up your program...', false);
+      }
+    });
+  }
+
+  function doForgot() {
+    var email = document.getElementById('a-signin-email').value.trim();
+    if(!email) { showMsg('Enter your email address above first.', true); return; }
+    window.fbResetPassword(email, function(err) {
+      if(err) { showMsg('Could not send reset email. Check your address.', true); }
+      else { showMsg('Reset email sent. Check your inbox.', false); }
+    });
+  }
+
+  window.doSignOut = function() {
+    if(confirm('Sign out? Your progress is saved to the cloud.')) { window.fbSignOut(); }
+  };
+
+  // Bind everything after DOM loads
+  function bindAuth() {
+    // Tab switching
+    var tabs = document.querySelectorAll('.auth-tab');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() { switchTab(this.getAttribute('data-tab')); });
+    });
+
+    // Buttons
+    var btnSignin = document.getElementById('a-btn-signin');
+    var btnSignup = document.getElementById('a-btn-signup');
+    var btnForgot = document.getElementById('a-btn-forgot');
+
+    if(btnSignin) btnSignin.addEventListener('click', doSignIn);
+    if(btnSignup) btnSignup.addEventListener('click', doSignUp);
+    if(btnForgot) btnForgot.addEventListener('click', doForgot);
+
+    // Enter key support
+    document.getElementById('a-signin-pass') && document.getElementById('a-signin-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doSignIn(); });
+    document.getElementById('a-signup-confirm') && document.getElementById('a-signup-confirm').addEventListener('keydown', function(e){ if(e.key==='Enter') doSignUp(); });
+  }
+
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindAuth);
+  } else {
+    bindAuth();
+  }
+})();
+</script>
 
 </body>
 </html>
