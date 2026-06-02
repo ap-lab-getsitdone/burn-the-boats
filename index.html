@@ -238,9 +238,13 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
             document.getElementById('sc-setup').classList.add('active');
           }
         } else {
-          console.log('No Firebase data for this user - showing setup');
+          console.log('No Firebase data for this user - showing welcome then setup');
           document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-          document.getElementById('sc-setup').classList.add('active');
+          if (!hasSeenWelcome()) {
+            document.getElementById('sc-welcome').classList.add('active');
+          } else {
+            document.getElementById('sc-setup').classList.add('active');
+          }
         }
       }).catch(function(err) {
         console.error('Firebase load error:', err);
@@ -454,6 +458,64 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   <button class="btn btn-p" style="max-width:280px" onclick="closeCeremony()">Continue →</button>
 </div>
 
+
+<!-- ═══════════════════════════════════
+     WELCOME / DISCLAIMER SCREEN
+     Shows once after first login
+═══════════════════════════════════ -->
+<div id="sc-welcome" class="screen">
+<style>
+.wlc-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:40px 24px;background:var(--bg);max-width:600px;margin:0 auto}
+.wlc-eyebrow{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:4px;color:var(--rd);text-transform:uppercase;margin-bottom:16px}
+.wlc-title{font-family:var(--fd);font-weight:900;font-size:42px;line-height:1;text-transform:uppercase;letter-spacing:1px;color:var(--tx);margin-bottom:20px}
+.wlc-divider{width:40px;height:3px;background:var(--rd);margin-bottom:24px}
+.wlc-body{font-size:14px;line-height:1.9;color:#ccc;margin-bottom:18px}
+.wlc-body strong{color:var(--tx)}
+.wlc-quote{font-family:var(--fd);font-size:16px;font-weight:600;font-style:italic;color:var(--tx);border-left:3px solid var(--rd);padding:12px 16px;margin:24px 0;background:var(--s2);border-radius:0 3px 3px 0;line-height:1.5}
+.wlc-warning{background:#1a0808;border:1px solid var(--rd);border-radius:3px;padding:16px 18px;margin:20px 0}
+.wlc-warning-title{font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:2px;color:var(--rd);text-transform:uppercase;margin-bottom:8px}
+.wlc-warning-text{font-size:13px;color:#ccc;line-height:1.7}
+</style>
+<div class="wlc-wrap">
+  <div class="wlc-eyebrow">Before You Begin</div>
+  <div class="wlc-title">This Program<br>Is Not For<br>Everyone.</div>
+  <div class="wlc-divider"></div>
+
+  <div class="wlc-body">
+    If you are here because you thought this looked interesting — leave.<br>
+    If you are here to test how long you can last — leave.<br>
+    If you are here because someone told you to try it — leave.<br><br>
+    <strong>This program is for one type of person only.</strong> The person who is done negotiating with themselves. The person who has looked at their life, looked at the gap between where they are and where they want to be, and decided that the only way across that gap is through it.
+  </div>
+
+  <div class="wlc-body">
+    <strong>Here is what this program will ask of you:</strong> Small decisions. Every single day. A cold shower. A meditation. A page read. A non-negotiable completed before the excuse has time to form. These are not dramatic actions. They will not feel significant in the moment. That is exactly the point.
+  </div>
+
+  <div class="wlc-quote">"Discipline is not built in the moments that feel important. It is built in the moments that feel small — repeated until the small becomes the standard."</div>
+
+  <div class="wlc-body">
+    The person who completes this program will not look dramatically different after 30 days. But they will be fundamentally different. The accumulation of small, deliberate choices rewires how you see yourself. You stop being someone who wants discipline. You become someone who has it.
+  </div>
+
+  <div class="wlc-warning">
+    <div class="wlc-warning-title">The Honor System</div>
+    <div class="wlc-warning-text">
+      This program runs on the honor system. There is no algorithm watching you. No coach checking your reps. No one who will know if you skipped the cold shower and checked the box anyway.<br><br>
+      <strong style="color:var(--tx)">But you will know.</strong><br><br>
+      Every shortcut you take is a vote for the version of you that quits. Every time you check a box you didn't earn, you are not cheating the app. You are cheating your own growth. The only person who loses when you lie to this program is you — and the cost is not a missed workout. The cost is staying exactly who you are right now.
+    </div>
+  </div>
+
+  <div class="wlc-body" style="margin-top:8px">
+    If you are still reading, you are the right person for this program.<br>
+    <strong>Now prove it.</strong>
+  </div>
+
+  <button onclick="dismissWelcome()" class="btn btn-p" style="margin-top:24px;padding:16px">I Understand — Take Me to Setup →</button>
+</div>
+</div>
+
 <!-- ═══════════════════════════════════
      SETUP SCREEN
 ═══════════════════════════════════ -->
@@ -532,10 +594,14 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div class="big-title">Burn<br>the Boats</div>
       <div class="big-sub">You are not entering this casually. You are removing the option to retreat.</div>
       <div class="cbox2">
-        <p>By starting this program, I acknowledge that:</p><br>
-        <p><strong>Every task must be completed as written.</strong> No substitutions, no modifications, no delays.</p><br>
-        <p><strong>Partial completion is failure.</strong></p><br>
-        <p><strong>Consequences are real.</strong> Miss 1 day: document it and add to end of week. Miss 2 days: complete a penalty challenge before continuing. Miss 3+ days or fall below the weekly threshold: restart the current week from Day 1.</p><br>
+        <p style="color:var(--rd);font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">The Honor System</p>
+        <p>This program cannot be policed. No one will verify your push-ups. No one will watch your cold shower. No one will read your journal. <strong>The only person who knows if you are being honest is you.</strong></p><br>
+        <p>Every small decision compounds. The 10-minute meditation you actually do is worth more than the hour-long workout you perform. The non-negotiable you complete at 11pm when you're exhausted builds more discipline than the one you skip because the timing wasn't right. <strong>Small decisions, repeated daily, are the entire program.</strong></p><br>
+        <p>If you check a box you didn't earn, you are not cheating the app. You are choosing to stay exactly who you are. The gap between where you are and where you want to be does not close through performance. It closes through honesty — with yourself, every day, whether anyone is watching or not.</p><br>
+        <p style="color:var(--tx);font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">By Signing Below, I Commit To:</p>
+        <p><strong>Completing every task as written.</strong> No substitutions, no modifications, no delays.</p><br>
+        <p><strong>Honoring the standard even when no one is watching.</strong> Especially then.</p><br>
+        <p><strong>Accepting consequences.</strong> Miss 1 day: document it. Miss 2 days: penalty challenge before continuing. Miss 3+ days: restart the current week from Day 1.</p><br>
         <p>Discomfort is expected. Resistance is expected. <strong>Neither is an excuse.</strong></p><br>
         <p>Once I begin, there is no negotiating with who I used to be.</p>
       </div>
@@ -1260,6 +1326,28 @@ function getCoach(){
   setTimeout(()=>{o.innerHTML='AI coaching feedback connects to the Anthropic API in the full release. It will read your reflection, reference your past entries, and respond like a no-BS coach — calling out patterns, naming the real resistance, giving you one clear action for tomorrow.';},1200);
 }
 
+
+
+// WELCOME / DISCLAIMER SCREEN
+function showWelcome() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-welcome').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function dismissWelcome() {
+  if (window.UID) {
+    try { localStorage.setItem('btb_welcome_seen_' + window.UID, '1'); } catch(e) {}
+  }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-setup').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function hasSeenWelcome() {
+  if (!window.UID) return false;
+  try { return localStorage.getItem('btb_welcome_seen_' + window.UID) === '1'; } catch(e) { return false; }
+}
 
 // ADMIN DASHBOARD
 let adminDay = null;
