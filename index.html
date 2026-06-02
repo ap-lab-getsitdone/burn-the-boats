@@ -653,6 +653,18 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div class="streak">🔥 <span id="streak-n">0</span></div>
     </div>
   </div>
+  <!-- Reminder Banner -->
+  <div class="reminder-banner" id="reminder-banner">
+    <div class="reminder-inner">
+      <div class="reminder-text">
+        <strong id="reminder-title">Day X is waiting.</strong>
+        <span id="reminder-msg">You haven't checked in today. Open your daily entry to complete your challenges.</span>
+      </div>
+      <button class="reminder-cta" onclick="openDay(S.cd)">Open Day →</button>
+      <button class="reminder-dismiss" onclick="dismissReminder()" title="Dismiss">×</button>
+    </div>
+  </div>
+
   <div class="tabs">
     <div class="tab active" onclick="swTab('today',this)">Today</div>
     <div class="tab" onclick="swTab('week',this)">Week</div>
@@ -1057,7 +1069,7 @@ function showMain(){
   document.getElementById('rank-display').textContent=rank.name;
   const wk=Math.ceil(S.cd/7);
   document.getElementById('main-lbl').textContent='Day '+S.cd+' of 30 · Week '+wk+': '+WK_NAMES[wk-1];
-  renderToday();renderWeek();renderProgram();window.scrollTo(0,0);checkBackupReminder();
+  renderToday();renderWeek();renderProgram();window.scrollTo(0,0);checkBackupReminder();checkReminderBanner();
 }
 
 function swTab(name,el){
@@ -1326,6 +1338,72 @@ function getCoach(){
   setTimeout(()=>{o.innerHTML='AI coaching feedback connects to the Anthropic API in the full release. It will read your reflection, reference your past entries, and respond like a no-BS coach — calling out patterns, naming the real resistance, giving you one clear action for tomorrow.';},1200);
 }
 
+
+
+
+// ═══════════════════════════════════
+// REMINDER BANNER SYSTEM
+// ═══════════════════════════════════
+const REMINDER_MESSAGES = [
+  "You haven't checked in today. The standard doesn't take days off.",
+  "Day {day} is waiting. Show up.",
+  "Your non-negotiables aren't going to complete themselves.",
+  "The version of you that skips today is the version you're trying to leave behind.",
+  "You didn't come this far to miss today.",
+  "Every day you don't show up is a vote for who you used to be.",
+  "The dip is real. Show up anyway.",
+  "Resistance is loudest right before you do the work. Do the work.",
+];
+
+function checkReminderBanner() {
+  if (!S || !S.started || !S.cd) return;
+  
+  const today = S.cd;
+  const todayData = S.days && S.days[today];
+  const isCompleted = todayData && todayData.completed;
+  
+  // Check if dismissed today
+  const dismissKey = 'btb_reminder_dismissed_day_' + today;
+  const dismissed = localStorage.getItem(dismissKey);
+  
+  if (!isCompleted && !dismissed) {
+    showReminderBanner(today);
+  }
+}
+
+function showReminderBanner(dayNum) {
+  const banner = document.getElementById('reminder-banner');
+  const title = document.getElementById('reminder-title');
+  const msg = document.getElementById('reminder-msg');
+  
+  if (!banner || !title || !msg) return;
+  
+  // Pick message based on day number
+  const msgIndex = (dayNum - 1) % REMINDER_MESSAGES.length;
+  const selectedMsg = REMINDER_MESSAGES[msgIndex].replace('{day}', dayNum);
+  
+  // Set content based on week
+  const week = Math.ceil(dayNum / 7);
+  let titleText = 'Day ' + dayNum + ' is waiting.';
+  
+  if (week === 2) titleText = 'Day ' + dayNum + '. The dip is here.';
+  if (week === 3) titleText = 'Day ' + dayNum + '. Stay the course.';
+  if (week === 4) titleText = 'Day ' + dayNum + '. This is the proof.';
+  
+  title.textContent = titleText;
+  msg.textContent = selectedMsg;
+  
+  banner.classList.add('show');
+}
+
+function dismissReminder() {
+  const banner = document.getElementById('reminder-banner');
+  if (banner) banner.classList.remove('show');
+  
+  // Remember dismissed for today
+  const dismissKey = 'btb_reminder_dismissed_day_' + (S.cd || 1);
+  try { localStorage.setItem(dismissKey, Date.now().toString()); } catch(e) {}
+}
 
 
 // WELCOME / DISCLAIMER SCREEN
