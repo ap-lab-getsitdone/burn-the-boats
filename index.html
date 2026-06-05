@@ -1615,7 +1615,7 @@ function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingPro
       </button>
       <span style="font-size:10px;color:var(--di)">Photo or video required to complete</span>
     </div>
-    <input type="file" id="file-${wrapperId}" accept="image/*,video/*" capture="environment" style="display:none" 
+    <input type="file" id="file-${wrapperId}" accept="image/*,video/*" style="display:none" 
       onchange="handleProofFile(${dayNum},${challengeIdx},this)">
     ` : ''}
     <div class="proof-progress" id="prog-${wrapperId}">
