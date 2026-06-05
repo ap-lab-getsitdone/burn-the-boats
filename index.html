@@ -1204,6 +1204,7 @@ function checkBackupReminder(){
   // placeholder - backup reminder feature
 }
 function showMain(){
+  if(window.S && window.S.started) S=window.S;
   syncDayToTime();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('sc-main').classList.add('active');
