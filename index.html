@@ -180,6 +180,27 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 .rg-bar{flex:1;background:var(--rd);border-radius:2px 2px 0 0;min-height:4px;transition:height .3s;opacity:.7}
 .rg-bar.empty{background:var(--b2);opacity:.4}
 
+
+/* PROOF UPLOAD */
+.proof-wrap{margin-top:8px;padding:10px 12px;background:var(--s2);border:1px dashed var(--b2);border-radius:3px;transition:border-color .15s}
+.proof-wrap.has-proof{border:1px solid var(--gn);background:#0a180c}
+.proof-label{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.proof-label.verified{color:var(--gn)}
+.proof-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--fd);font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:2px;cursor:pointer;border:none;transition:all .15s}
+.proof-btn-upload{background:var(--s1);color:var(--mu);border:1px solid var(--b2)}
+.proof-btn-upload:hover{border-color:var(--rd);color:var(--tx)}
+.proof-btn-remove{background:transparent;color:var(--di);font-size:18px;padding:0 4px;line-height:1}
+.proof-progress{height:3px;background:var(--b2);border-radius:2px;margin-top:8px;overflow:hidden;display:none}
+.proof-progress-bar{height:100%;background:var(--rd);border-radius:2px;transition:width .3s;width:0%}
+.proof-preview{margin-top:8px;display:none}
+.proof-preview img{max-width:100%;max-height:120px;border-radius:2px;object-fit:cover}
+.proof-preview video{max-width:100%;max-height:120px;border-radius:2px}
+.proof-status{font-size:11px;margin-top:5px;line-height:1.4}
+.proof-status.uploading{color:var(--am)}
+.proof-status.done{color:var(--gn)}
+.proof-status.error{color:var(--rd2)}
+.proof-required-msg{font-size:11px;color:var(--rd2);margin-top:6px;display:none}
+
 @media(max-width:480px){.egrid{grid-template-columns:1fr}.dht{font-size:32px}.big-title{font-size:28px}.cer-day{font-size:60px}}
 
 /* REMINDER BANNER */
@@ -201,6 +222,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   // ═══════════════════════════════════════════════
   // FIREBASE CONFIG — REPLACE WITH YOUR CREDENTIALS
@@ -220,6 +242,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const auth = getAuth(app);
+  const storage = getStorage(app);
 
   // ── AUTH-BASED USER ID ──
   let UID = null;
@@ -428,6 +451,55 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       console.log('Content overrides applied:', Object.keys(window.contentOverrides).length, 'days updated');
     }
   });
+
+
+  // ── FIREBASE STORAGE — PROOF UPLOADS ──
+  window.uploadProof = function(file, dayNum, challengeIdx, onProgress, onComplete, onError) {
+    if (!UID) { onError('Not signed in'); return; }
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'];
+    if (!validTypes.includes(file.type)) {
+      onError('Invalid file type. Please upload a photo or video.');
+      return;
+    }
+    
+    // Validate file size — 100MB max
+    const maxSize = 100 * 1024 * 1024;
+    if (file.size > maxSize) {
+      onError('File too large. Maximum size is 100MB.');
+      return;
+    }
+    
+    const ext = file.name.split('.').pop();
+    const path = 'proof/' + UID + '/day' + dayNum + '/challenge' + challengeIdx + '_' + Date.now() + '.' + ext;
+    const fileRef = storageRef(storage, path);
+    const uploadTask = uploadBytesResumable(fileRef, file);
+    
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        if (onProgress) onProgress(progress);
+      },
+      (error) => {
+        console.error('Upload error:', error);
+        if (onError) onError('Upload failed. Please try again.');
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+          if (onComplete) onComplete(url, path);
+        });
+      }
+    );
+    
+    return uploadTask;
+  };
+
+  window.deleteProof = function(storagePath) {
+    if (!storagePath) return;
+    const fileRef = storageRef(storage, storagePath);
+    deleteObject(fileRef).catch(e => console.warn('Delete failed:', e));
+  };
 
   // Mark Firebase as ready
   window.firebaseReady = true;
@@ -1230,14 +1302,49 @@ function openDay(dn){
   // Reading
   document.getElementById('dv-read').innerHTML=d.r.split('\n\n').map(p=>`<p style="font-size:14px;line-height:1.8;color:#ccc;margin-bottom:10px">${p}</p>`).join('')+`<div class="pquote">"${d.q}"</div>`;
 
-  // Challenges
+  // Challenges with proof upload
   const ce=document.getElementById('dv-chs');ce.innerHTML='';
   d.c.forEach((ch,i)=>{
     const done=sd.chDone&&sd.chDone[i];
-    const el=document.createElement('div');el.className='ci'+(done?' done':'');
+    const proof = hasProof(dn, i);
+    
+    // Challenge container
+    const container = document.createElement('div');
+    container.style.cssText = 'margin-bottom:8px';
+    
+    // Challenge check item
+    const el=document.createElement('div');
+    el.className='ci'+(done?' done':'');
     el.innerHTML=`<div class="cbox">${done?'✓':''}</div><div class="ctext">${ch}</div>`;
-    el.onclick=()=>{togCH(dn,i);el.className='ci'+(S.days[dn].chDone[i]?' done':'');el.querySelector('.cbox').textContent=S.days[dn].chDone[i]?'✓':'';el.querySelector('.ctext').style.textDecoration=S.days[dn].chDone[i]?'line-through':'none';el.querySelector('.ctext').style.color=S.days[dn].chDone[i]?'var(--mu)':'';};
-    ce.appendChild(el);
+    el.onclick=()=>{
+      // Check if proof is required and uploaded
+      if(!S.days[dn] || !S.days[dn].chProof || !S.days[dn].chProof[i]) {
+        // Show proof required message
+        const reqEl = document.getElementById('req-proof-'+dn+'-'+i);
+        if (reqEl) { reqEl.style.display='block'; setTimeout(()=>{reqEl.style.display='none';},3000); }
+        return;
+      }
+      togCH(dn,i);
+      el.className='ci'+(S.days[dn].chDone[i]?' done':'');
+      el.querySelector('.cbox').textContent=S.days[dn].chDone[i]?'✓':'';
+      el.querySelector('.ctext').style.textDecoration=S.days[dn].chDone[i]?'line-through':'none';
+      el.querySelector('.ctext').style.color=S.days[dn].chDone[i]?'var(--mu)':'';
+    };
+    container.appendChild(el);
+    
+    // Proof uploader
+    const existingProof = sd.chProof && sd.chProof[i];
+    const proofUploader = createProofUploader(dn, i, existingProof ? existingProof.url : null, existingProof ? existingProof.path : null);
+    
+    // Add proof required message
+    const reqMsg = document.createElement('div');
+    reqMsg.id = 'req-proof-'+dn+'-'+i;
+    reqMsg.className = 'proof-required-msg';
+    reqMsg.textContent = '⚠ Upload proof before marking complete';
+    proofUploader.appendChild(reqMsg);
+    
+    container.appendChild(proofUploader);
+    ce.appendChild(container);
   });
 
   // NNs
@@ -1420,6 +1527,155 @@ function dismissReminder() {
 }
 
 
+
+// ═══════════════════════════════════
+// PROOF UPLOAD SYSTEM
+// ═══════════════════════════════════
+
+function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingProofPath) {
+  const wrapperId = 'proof-' + dayNum + '-' + challengeIdx;
+  
+  const wrapper = document.createElement('div');
+  wrapper.className = 'proof-wrap' + (existingProofUrl ? ' has-proof' : '');
+  wrapper.id = wrapperId;
+  
+  const isVideo = existingProofUrl && (existingProofUrl.includes('.mp4') || existingProofUrl.includes('.mov') || existingProofUrl.includes('.webm') || existingProofUrl.includes('video'));
+  
+  wrapper.innerHTML = `
+    <div class="proof-label ${existingProofUrl ? 'verified' : ''}">
+      <span>${existingProofUrl ? '✓ PROOF SUBMITTED' : 'PROOF REQUIRED'}</span>
+      ${existingProofUrl ? '<button class="proof-btn proof-btn-remove" onclick="removeProof('+dayNum+','+challengeIdx+')" title="Remove proof">×</button>' : ''}
+    </div>
+    <div class="proof-preview" id="prev-${wrapperId}" style="${existingProofUrl ? 'display:block' : 'display:none'}">
+      ${existingProofUrl ? (isVideo ? 
+        '<video src="'+existingProofUrl+'" controls></video>' : 
+        '<img src="'+existingProofUrl+'" alt="Proof">') : ''}
+    </div>
+    ${!existingProofUrl ? `
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button class="proof-btn proof-btn-upload" onclick="triggerProofUpload(${dayNum},${challengeIdx})">
+        📷 Upload Photo or Video
+      </button>
+      <span style="font-size:10px;color:var(--di)">Photo or video required to complete</span>
+    </div>
+    <input type="file" id="file-${wrapperId}" accept="image/*,video/*" capture="environment" style="display:none" 
+      onchange="handleProofFile(${dayNum},${challengeIdx},this)">
+    ` : ''}
+    <div class="proof-progress" id="prog-${wrapperId}">
+      <div class="proof-progress-bar" id="progbar-${wrapperId}"></div>
+    </div>
+    <div class="proof-status" id="status-${wrapperId}"></div>
+    <div class="proof-required-msg" id="req-${wrapperId}">⚠ Upload proof to mark this challenge complete</div>
+  `;
+  
+  return wrapper;
+}
+
+function triggerProofUpload(dayNum, challengeIdx) {
+  const fileInput = document.getElementById('file-proof-' + dayNum + '-' + challengeIdx);
+  if (fileInput) fileInput.click();
+  // Also try the other ID format
+  const fileInput2 = document.getElementById('file-proof-' + dayNum + '-' + challengeIdx);
+  const wrapper = document.getElementById('proof-' + dayNum + '-' + challengeIdx);
+  if (wrapper) {
+    const input = wrapper.querySelector('input[type="file"]');
+    if (input) input.click();
+  }
+}
+
+function handleProofFile(dayNum, challengeIdx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const wrapperId = 'proof-' + dayNum + '-' + challengeIdx;
+  const prog = document.getElementById('prog-' + wrapperId);
+  const progBar = document.getElementById('progbar-' + wrapperId);
+  const status = document.getElementById('status-' + wrapperId);
+  
+  if (prog) prog.style.display = 'block';
+  if (status) { status.textContent = 'Uploading...'; status.className = 'proof-status uploading'; }
+  
+  window.uploadProof(
+    file, dayNum, challengeIdx,
+    (progress) => {
+      if (progBar) progBar.style.width = progress + '%';
+      if (status) status.textContent = 'Uploading... ' + progress + '%';
+    },
+    (url, path) => {
+      // Save proof URL and path to day data
+      if (!S.days[dayNum]) S.days[dayNum] = {};
+      if (!S.days[dayNum].chProof) S.days[dayNum].chProof = {};
+      S.days[dayNum].chProof[challengeIdx] = { url: url, path: path, ts: Date.now() };
+      save();
+      
+      // Update UI
+      const wrapper = document.getElementById(wrapperId);
+      if (wrapper) {
+        wrapper.className = 'proof-wrap has-proof';
+        const isVid = file.type.startsWith('video/');
+        wrapper.innerHTML = `
+          <div class="proof-label verified">
+            <span>✓ PROOF SUBMITTED</span>
+            <button class="proof-btn proof-btn-remove" onclick="removeProof(${dayNum},${challengeIdx})" title="Remove proof">×</button>
+          </div>
+          <div class="proof-preview" style="display:block">
+            ${isVid ? '<video src="'+url+'" controls></video>' : '<img src="'+url+'" alt="Proof submitted">'}
+          </div>
+          <div class="proof-status done">✓ Proof uploaded successfully</div>
+        `;
+      }
+      
+      if (status) { status.textContent = '✓ Uploaded successfully'; status.className = 'proof-status done'; }
+      if (prog) setTimeout(() => { prog.style.display = 'none'; }, 1000);
+    },
+    (error) => {
+      if (status) { status.textContent = '✗ ' + error; status.className = 'proof-status error'; }
+      if (prog) prog.style.display = 'none';
+    }
+  );
+}
+
+function removeProof(dayNum, challengeIdx) {
+  if (!confirm('Remove proof for this challenge?')) return;
+  
+  const proof = S.days[dayNum] && S.days[dayNum].chProof && S.days[dayNum].chProof[challengeIdx];
+  if (proof && proof.path) {
+    window.deleteProof(proof.path);
+  }
+  
+  if (S.days[dayNum] && S.days[dayNum].chProof) {
+    delete S.days[dayNum].chProof[challengeIdx];
+    // Also uncheck the challenge
+    if (S.days[dayNum].chDone) S.days[dayNum].chDone[challengeIdx] = false;
+    save();
+  }
+  
+  // Re-render proof uploader
+  const wrapperId = 'proof-' + dayNum + '-' + challengeIdx;
+  const wrapper = document.getElementById(wrapperId);
+  if (wrapper) {
+    const newUploader = createProofUploader(dayNum, challengeIdx, null, null);
+    wrapper.parentNode.replaceChild(newUploader, wrapper);
+  }
+  
+  // Update today tab
+  renderToday();
+}
+
+function hasProof(dayNum, challengeIdx) {
+  return S.days[dayNum] && 
+         S.days[dayNum].chProof && 
+         S.days[dayNum].chProof[challengeIdx] && 
+         S.days[dayNum].chProof[challengeIdx].url;
+}
+
+function showProofRequired(dayNum, challengeIdx) {
+  const reqMsg = document.getElementById('req-proof-' + dayNum + '-' + challengeIdx);
+  if (reqMsg) reqMsg.style.display = 'block';
+  setTimeout(() => { if (reqMsg) reqMsg.style.display = 'none'; }, 3000);
+}
+
+
 // WELCOME / DISCLAIMER SCREEN
 function showWelcome() {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1564,9 +1820,27 @@ function loadTesterActivity() {
       const u = testers[uid];
       totalDay += (u.cd || 1);
       totalComp += u.streak || 0;
+      
+      // Count proof submissions
+      let proofCount = 0;
+      if (u.days) {
+        Object.values(u.days).forEach(function(day) {
+          if (day && day.chProof) proofCount += Object.keys(day.chProof).length;
+        });
+      }
+      
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:2px;margin-bottom:5px;font-size:12px;';
-      row.innerHTML = '<span style="color:var(--mu)">Tester '+(idx+1)+(u.sig?' ('+u.sig+')':'')+'</span><span style="color:var(--tx)">Day '+(u.cd||1)+' - '+(u.streak||0)+'</span>';
+      row.style.cssText = 'background:var(--s1);border:1px solid var(--b1);border-radius:2px;margin-bottom:8px;overflow:hidden';
+      row.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer" onclick="toggleProofView(this)">' +
+        '<div>' +
+          '<div style="font-size:13px;color:var(--tx);font-family:var(--fd);font-weight:700">' + (u.sig || 'Tester '+(idx+1)) + '</div>' +
+          '<div style="font-size:10px;color:var(--mu);margin-top:2px">Day '+(u.cd||1)+' · Streak '+(u.streak||0)+' · '+proofCount+' proofs submitted</div>' +
+        '</div>' +
+        '<span style="color:var(--mu);font-size:18px">▼</span>' +
+      '</div>' +
+      '<div class="proof-review" style="display:none;padding:12px 14px;border-top:1px solid var(--b1)">' +
+        renderProofThumbnails(u) +
+      '</div>';
       el.appendChild(row);
     });
     const avgDay = document.getElementById('admin-avg-day');
@@ -1574,6 +1848,49 @@ function loadTesterActivity() {
     if (avgDay) avgDay.textContent = Math.round(totalDay/uids.length);
     if (completions) completions.textContent = totalComp;
   });
+}
+
+function toggleProofView(header) {
+  const proofSection = header.nextElementSibling;
+  if (proofSection) {
+    const isOpen = proofSection.style.display !== 'none';
+    proofSection.style.display = isOpen ? 'none' : 'block';
+    const arrow = header.querySelector('span');
+    if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
+  }
+}
+
+function renderProofThumbnails(userData) {
+  if (!userData.days) return '<div style="font-size:11px;color:var(--di)">No proof submissions yet</div>';
+  
+  let html = '';
+  let hasAny = false;
+  
+  Object.keys(userData.days).forEach(function(dayKey) {
+    const day = userData.days[dayKey];
+    if (!day || !day.chProof) return;
+    
+    Object.keys(day.chProof).forEach(function(chKey) {
+      const proof = day.chProof[chKey];
+      if (!proof || !proof.url) return;
+      hasAny = true;
+      
+      const isVideo = proof.url.includes('.mp4') || proof.url.includes('.mov') || proof.url.includes('.webm');
+      const dayNum = parseInt(dayKey);
+      const chNum = parseInt(chKey);
+      const challengeName = (window.DD && window.DD[dayNum-1] && window.DD[dayNum-1].c) ? window.DD[dayNum-1].c[chNum] : 'Challenge '+(chNum+1);
+      
+      html += '<div style="margin-bottom:12px">' +
+        '<div style="font-size:10px;color:var(--mu);font-family:var(--fd);font-weight:700;letter-spacing:1px;margin-bottom:4px">DAY ' + dayNum + ' · ' + challengeName.substring(0,40) + '</div>' +
+        (isVideo ? 
+          '<video src="'+proof.url+'" controls style="max-width:100%;max-height:150px;border-radius:2px"></video>' :
+          '<img src="'+proof.url+'" style="max-width:100%;max-height:150px;border-radius:2px;object-fit:cover" onclick="window.open(''+proof.url+'','_blank')" style="cursor:pointer">') +
+        '<div style="font-size:10px;color:var(--di);margin-top:3px">' + new Date(proof.ts).toLocaleDateString() + '</div>' +
+      '</div>';
+    });
+  });
+  
+  return hasAny ? html : '<div style="font-size:11px;color:var(--di)">No proof submissions yet</div>';
 }
 
 // ═══════════════════════════════════
