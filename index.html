@@ -86,6 +86,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 .dc{background:var(--s1);border:1px solid var(--b1);border-radius:3px;margin-bottom:7px;cursor:pointer;transition:all .15s;overflow:hidden}
 .dc:hover:not(.locked){border-color:var(--b2)}.dc.locked{opacity:.4;cursor:not-allowed}
 .dc.completed{border-color:var(--gn)}.dc.is-today{border-color:var(--rd)}
+.dc.missed{border-color:var(--rd);opacity:.6;cursor:not-allowed}.dc.missed .dn{color:var(--rd2)}.dc.missed .dico{color:var(--rd2)}
 .dci{display:flex;align-items:center;padding:14px 16px;gap:14px}
 .dn{font-family:var(--fd);font-weight:900;font-size:30px;line-height:1;color:var(--di);min-width:40px}
 .dc.completed .dn{color:var(--gn)}.dc.is-today .dn{color:var(--rd)}
@@ -1127,7 +1128,7 @@ function saveNNs(){
 function signBegin(){
   const s=document.getElementById('sig').value.trim();
   if(!s){alert('Please sign your name.');return;}
-  S.sig=s;S.startDate=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  S.sig=s;S.startDate=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});S.dayStartTimestamp=Date.now();
   S.started="yes"; S._hasData=1;
   // Save to localStorage immediately
   try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
@@ -1142,12 +1143,68 @@ function signBegin(){
 }
 
 // ═══════════════════════════════════
+// 24-HOUR AUTO-ADVANCE SYSTEM
+// ═══════════════════════════════════
+// Each day is a rolling 24-hour window from program start.
+// If the user does not complete a day within its window, the day is
+// marked missed, the streak hard-resets to 0, and the app advances
+// to whatever day the calendar says it should be on.
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function computeExpectedDay(){
+  // Returns the day number (1-30) the user SHOULD be on based on elapsed time.
+  if(!S.dayStartTimestamp) return S.cd || 1;
+  const elapsed = Date.now() - S.dayStartTimestamp;
+  const windows = Math.floor(elapsed / DAY_MS); // full 24h windows passed
+  const expected = 1 + windows;
+  if(expected < 1) return 1;
+  if(expected > 30) return 30;
+  return expected;
+}
+
+function syncDayToTime(){
+  // Guard: only runs for started programs that have a timestamp.
+  if(!S.started || !S.dayStartTimestamp) return;
+
+  const expected = computeExpectedDay();
+  const current = S.cd || 1;
+
+  // If time hasn't moved us forward, nothing to do.
+  if(expected <= current) return;
+
+  // We've crossed into one or more new day-windows.
+  // Walk every day from current up to (but not including) expected.
+  // Any of those days that was NOT completed counts as missed.
+  let missedAny = false;
+  for(let d = current; d < expected; d++){
+    const sd = S.days[d];
+    const wasCompleted = sd && sd.completed;
+    if(!wasCompleted){
+      if(!S.days[d]) S.days[d] = {};
+      S.days[d].missed = true;
+      missedAny = true;
+    }
+  }
+
+  // Hard reset on any miss.
+  if(missedAny){
+    S.streak = 0;
+    S._lastReset = Date.now();
+  }
+
+  // Advance the current day pointer to where time says we are.
+  S.cd = expected;
+  save();
+}
+
+// ═══════════════════════════════════
 // MAIN
 // ═══════════════════════════════════
 function checkBackupReminder(){ 
   // placeholder - backup reminder feature
 }
 function showMain(){
+  syncDayToTime();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('sc-main').classList.add('active');
   document.getElementById('streak-n').textContent=S.streak;
@@ -1269,11 +1326,11 @@ function renderProgram(){
       ph.innerHTML=`<div><div class="phase-name">Week ${wk}: ${WK_NAMES[wk-1]} <span class="wk-badge ${WK_CLS[wk-1]}">Week ${wk}</span></div><div class="phase-theme">${WK_THEMES[wk-1]}</div></div>`;
       el.appendChild(ph);
     }
-    const locked=dayN>S.cd;const comp=S.days[dayN]&&S.days[dayN].completed;const isT=dayN===S.cd;
+    const locked=dayN>S.cd;const comp=S.days[dayN]&&S.days[dayN].completed;const missed=S.days[dayN]&&S.days[dayN].missed&&!comp;const isT=dayN===S.cd;
     const dc=document.createElement('div');
-    dc.className='dc'+(comp?' completed':'')+(isT&&!comp?' is-today':'')+(locked?' locked':'');
-    dc.innerHTML=`<div class="dci"><div class="dn">${dayN<10?'0'+dayN:dayN}</div><div class="dic"><div class="dct">${d.t}</div><div class="dcm" style="font-size:10px">${d.c.join(' · ')}</div></div><div class="dico">${comp?'✓':locked?'🔒':'→'}</div></div>`;
-    if(!locked)dc.onclick=()=>openDay(dayN);el.appendChild(dc);
+    dc.className='dc'+(comp?' completed':'')+(missed?' missed':'')+(isT&&!comp?' is-today':'')+(locked?' locked':'');
+    dc.innerHTML=`<div class="dci"><div class="dn">${dayN<10?'0'+dayN:dayN}</div><div class="dic"><div class="dct">${d.t}</div><div class="dcm" style="font-size:10px">${missed?'<span style=\'color:var(--rd2);font-family:var(--fd);font-weight:700;letter-spacing:1px\'>⚠ MISSED — STREAK RESET</span>':d.c.join(' · ')}</div></div><div class="dico">${comp?'✓':missed?'✗':locked?'🔒':'→'}</div></div>`;
+    if(!locked&&!missed)dc.onclick=()=>openDay(dayN);el.appendChild(dc);
   });
 }
 
@@ -1884,7 +1941,7 @@ function renderProofThumbnails(userData) {
         '<div style="font-size:10px;color:var(--mu);font-family:var(--fd);font-weight:700;letter-spacing:1px;margin-bottom:4px">DAY ' + dayNum + ' · ' + challengeName.substring(0,40) + '</div>' +
         (isVideo ? 
           '<video src="'+proof.url+'" controls style="max-width:100%;max-height:150px;border-radius:2px"></video>' :
-          '<img src="'+proof.url+'" style="max-width:100%;max-height:150px;border-radius:2px;object-fit:cover" onclick="window.open(''+proof.url+'','_blank')" style="cursor:pointer">') +
+          '<img src="'+proof.url+'" style="max-width:100%;max-height:150px;border-radius:2px;object-fit:cover" onclick="window.open(\''+proof.url+'\',\'_blank\')" style="cursor:pointer">') +
         '<div style="font-size:10px;color:var(--di);margin-top:3px">' + new Date(proof.ts).toLocaleDateString() + '</div>' +
       '</div>';
     });
