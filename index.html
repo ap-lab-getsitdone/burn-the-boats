@@ -259,23 +259,35 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       document.getElementById('sc-auth').classList.remove('active');
       
       // Always load directly from Firebase - ignore localStorage completely
-      get(ref(db, 'users/' + UID)).then(function(snapshot) {
-        if (snapshot.exists()) {
-          var data = snapshot.val();
-          console.log('Firebase data found:', JSON.stringify(data).substring(0, 100));
-          if (data && (data.started || data.sig || data.startDate || data.nns)) {
-            window.S = data;
-            // Make sure started is set
-            window.S.started = 'yes';
-            try { localStorage.setItem('btb30v2', JSON.stringify(window.S)); } catch(e) {}
-            showMain();
-            if (window.fbListen) window.fbListen();
-          } else {
-            document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-            document.getElementById('sc-setup').classList.add('active');
-          }
+      // Helper: hydrate state from a data object and enter the app.
+      function enterAppWith(data) {
+        window.S = data;
+        window.S.started = 'yes';
+        if (!window.S.nns) window.S.nns = [];
+        if (!window.S.cd) window.S.cd = 1;
+        if (!window.S.streak) window.S.streak = 0;
+        if (!window.S.days) window.S.days = {};
+        if (!window.S.debrief) window.S.debrief = {};
+        try { localStorage.setItem('btb30v2', JSON.stringify(window.S)); } catch(e) {}
+        showMain();
+        if (window.fbListen) window.fbListen();
+      }
+
+      // Helper: only reached when cloud gave us nothing. Check local before
+      // ever assuming this is a brand-new user. A restart is NEVER forced on
+      // anyone who has data somewhere.
+      function fallbackToLocalOrSetup(reason) {
+        console.log('Cloud unavailable (' + reason + ') — checking local backup');
+        var localData = null;
+        try { localData = JSON.parse(localStorage.getItem('btb30v2') || 'null'); } catch(e) {}
+        var hasLocal = localData && (localData.sig || localData.started ||
+                       (localData.nns && (localData.nns.length || Object.keys(localData.nns).length)));
+        if (hasLocal) {
+          console.log('Local backup found — restoring session, will re-sync to cloud when available');
+          enterAppWith(localData);
+          // Attempt to push local data back up in case cloud was simply empty.
+          if (window.fbSave) { try { window.fbSave(window.S); } catch(e) {} }
         } else {
-          console.log('No Firebase data for this user - showing welcome then setup');
           document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
           if (!hasSeenWelcome()) {
             document.getElementById('sc-welcome').classList.add('active');
@@ -283,10 +295,23 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
             document.getElementById('sc-setup').classList.add('active');
           }
         }
+      }
+
+      get(ref(db, 'users/' + UID)).then(function(snapshot) {
+        if (snapshot.exists()) {
+          var data = snapshot.val();
+          console.log('Firebase data found:', JSON.stringify(data).substring(0, 100));
+          // Any data at all = returning user. Don't gate on specific fields.
+          enterAppWith(data);
+        } else {
+          // Cloud has no record — fall back to local before showing setup.
+          fallbackToLocalOrSetup('no cloud record');
+        }
       }).catch(function(err) {
+        // Read failed entirely (network, or security rules / test-mode expiry).
+        // Do NOT force a restart — fall back to local data if we have it.
         console.error('Firebase load error:', err);
-        document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-        document.getElementById('sc-setup').classList.add('active');
+        fallbackToLocalOrSetup('read failed: ' + (err && err.code ? err.code : 'unknown'));
       });
     } else {
       UID = null;
