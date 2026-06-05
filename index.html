@@ -483,10 +483,15 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   window.uploadProof = function(file, dayNum, challengeIdx, onProgress, onComplete, onError) {
     if (!UID) { onError('Not signed in'); return; }
     
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'];
-    if (!validTypes.includes(file.type)) {
-      onError('Invalid file type. Please upload a photo or video.');
+    // Validate file type — accept any image or video. iPhones default to HEIC,
+    // and some iOS files report an empty MIME type, so fall back to extension.
+    const mime = (file.type || '').toLowerCase();
+    const fname = (file.name || '').toLowerCase();
+    const isImg = mime.indexOf('image/') === 0;
+    const isVid = mime.indexOf('video/') === 0;
+    const extOk = /\.(jpe?g|png|gif|webp|heic|heif|bmp|tiff?|mp4|mov|m4v|webm|3gp|avi)$/.test(fname);
+    if (!isImg && !isVid && !extOk) {
+      onError('Please upload a photo or video.');
       return;
     }
     
@@ -1655,15 +1660,12 @@ function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingPro
 }
 
 function triggerProofUpload(dayNum, challengeIdx) {
-  const fileInput = document.getElementById('file-proof-' + dayNum + '-' + challengeIdx);
-  if (fileInput) fileInput.click();
-  // Also try the other ID format
-  const fileInput2 = document.getElementById('file-proof-' + dayNum + '-' + challengeIdx);
+  // Click the file input exactly once. Clicking twice can make the iOS picker
+  // open and immediately dismiss, which looks like the screen "exiting".
   const wrapper = document.getElementById('proof-' + dayNum + '-' + challengeIdx);
-  if (wrapper) {
-    const input = wrapper.querySelector('input[type="file"]');
-    if (input) input.click();
-  }
+  let input = document.getElementById('file-proof-' + dayNum + '-' + challengeIdx);
+  if (!input && wrapper) input = wrapper.querySelector('input[type="file"]');
+  if (input) input.click();
 }
 
 function handleProofFile(dayNum, challengeIdx, input) {
