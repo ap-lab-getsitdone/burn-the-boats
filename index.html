@@ -605,7 +605,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   </div>
 
   <div class="wlc-body">
-    <strong>Here is what this program will ask of you:</strong> Small decisions. Every single day. A cold shower. A meditation. A page read. A non-negotiable completed before the excuse has time to form. These are not dramatic actions. They will not feel significant in the moment. That is exactly the point.
+    <strong>Here is what this program will ask of you:</strong> Small decisions. Every single day. A workout finished. A meal made right. A page read. A non-negotiable completed before the excuse has time to form. These are not dramatic actions. They will not feel significant in the moment. That is exactly the point.
   </div>
 
   <div class="wlc-quote">"Discipline is not built in the moments that feel important. It is built in the moments that feel small — repeated until the small becomes the standard."</div>
@@ -617,7 +617,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   <div class="wlc-warning">
     <div class="wlc-warning-title">The Honor System</div>
     <div class="wlc-warning-text">
-      This program runs on the honor system. There is no algorithm watching you. No coach checking your reps. No one who will know if you skipped the cold shower and checked the box anyway.<br><br>
+      This program runs on the honor system. There is no algorithm watching you. No coach checking your reps. No one who will know if you skipped the work and checked the box anyway.<br><br>
       <strong style="color:var(--tx)">But you will know.</strong><br><br>
       Every shortcut you take is a vote for the version of you that quits. Every time you check a box you didn't earn, you are not cheating the app. You are cheating your own growth. The only person who loses when you lie to this program is you — and the cost is not a missed workout. The cost is staying exactly who you are right now.
     </div>
@@ -711,7 +711,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div class="big-sub">You are not entering this casually. You are removing the option to retreat.</div>
       <div class="cbox2">
         <p style="color:var(--rd);font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">The Honor System</p>
-        <p>This program cannot be policed. No one will verify your push-ups. No one will watch your cold shower. No one will read your journal. <strong>The only person who knows if you are being honest is you.</strong></p><br>
+        <p>This program cannot be policed. No one will verify your push-ups. No one will check your meals. No one will read your journal. <strong>The only person who knows if you are being honest is you.</strong></p><br>
         <p>Every small decision compounds. The 10-minute meditation you actually do is worth more than the hour-long workout you perform. The non-negotiable you complete at 11pm when you're exhausted builds more discipline than the one you skip because the timing wasn't right. <strong>Small decisions, repeated daily, are the entire program.</strong></p><br>
         <p>If you check a box you didn't earn, you are not cheating the app. You are choosing to stay exactly who you are. The gap between where you are and where you want to be does not close through performance. It closes through honesty — with yourself, every day, whether anyone is watching or not.</p><br>
         <p style="color:var(--tx);font-family:var(--fd);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">By Signing Below, I Commit To:</p>
@@ -762,7 +762,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
         <div class="brand">BURN THE <span>BOATS</span></div>
         <div class="day-ind" id="main-lbl">Day 1 of 30</div>
       </div>
-      <button onclick="openAdmin()" style="background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
+      <button id="admin-btn" onclick="openAdmin()" style="display:none;background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
     </div>
     <div class="topbar-right"><button onclick="doSignOut()" style="background:transparent;border:1px solid var(--b2);color:var(--mu);font-size:9px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:2px;margin-right:4px">SIGN OUT</button><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
       <div class="rank-pill" id="rank-display">Landlubber</div>
@@ -986,130 +986,131 @@ const DD=[
   {w:1,t:"Burn the Boats",
    r:`There is a difference between wanting change and committing to it.\n\nWanting leaves a way out. Commitment removes one.\n\nWhen the boats were burned, it wasn't a dramatic gesture. It was a strategic one. With no exit, every unit of energy pointed forward. The decision had already been made.\n\nThis program starts the same way. You are not here to test the water. You are in it.`,
    q:"Once you begin, there is no negotiating with who you used to be.",
-   c:["50 push-ups — break into sets as needed","10-minute meditation — no phone, no music","Read 10 pages"]},
+   c:[{t:"50 push-ups",h:"Video of your set"},{t:"Drink a protein smoothie",h:"Photo of the glass"},{t:"Read 10 pages",h:"Photo of the pages"}]},
   {w:1,t:"The Shore Disappears",
    r:`Comfort doesn't disappear all at once. It fades slowly — then suddenly.\n\nRight now, the old shoreline is still visible. Old habits feel close enough to return to. That's exactly when resistance is strongest — when retreat still feels possible.\n\nToday's challenges exist to widen the gap. The farther you move, the quieter the pull becomes.`,
    q:"Don't measure today by how you feel. Measure it by whether you moved.",
-   c:["60 push-ups — break into sets as needed","2-minute plank","Complete your hardest non-negotiable first"]},
+   c:[{t:"60 push-ups",h:"Video of your set"},{t:"Eat a full salad",h:"Photo of the bowl"},{t:"Write 1 page: \"Who am I becoming?\"",h:"Photo of the page"}]},
   {w:1,t:"Distance From Comfort",
    r:`The pull of the old life is strongest right before it loses its grip.\n\nYou can feel it — the familiar routine calling, the old habit presenting itself as a reasonable option. Not loud. Not dramatic. Just available. That's what makes it dangerous. The pull backward doesn't announce itself. It disguises itself as common sense.\n\nHere's what's actually happening: every step forward makes the distance real. And distance is protection. The farther you move from who you were, the harder it becomes to go back. That's the point of today.`,
    q:"Progress today is measured by distance gained — not ease felt.",
-   c:["75 bodyweight squats — break into sets as needed","20-minute walk — no phone, no music","Read 15 pages"]},
+   c:[{t:"75 squats",h:"Video of your set"},{t:"Finish a gallon of water",h:"Photo of the empty jug"},{t:"Read 15 pages",h:"Photo of the pages"}]},
   {w:1,t:"The Cost of Negotiation",
    r:`More energy is lost to internal negotiation than to effort itself.\n\nDebate drains momentum. Delay disguises itself as logic. The moment pressure rises, the mind starts searching for exceptions — not because they're necessary, but because they protect comfort.\n\nBurning the boats eliminates that search. When the decision is already made, energy goes to execution — not argument.`,
    q:"Clarity is a performance advantage. Use it.",
-   c:["Run 1 mile","No phone after 7pm","Cold shower — 2 to 3 minutes"]},
+   c:[{t:"Run 1 mile",h:"Photo of your tracker"},{t:"Cook one meal from scratch",h:"Photo of the plate"},{t:"2-minute plank",h:"Video of the plank"}]},
   {w:1,t:"One Direction",
    r:`You cannot build a new life while holding onto the old one.\n\nHalf-commitment feels safer than full commitment. But it produces half-results — and half-results feel worse than no progress at all, because you can see what you're leaving behind.\n\nToday's challenges are designed to close that space. Less room to drift. Less room to revert.`,
    q:"Remove the ambiguity. Go all in. The results follow.",
-   c:["75 push-ups — break into sets as needed","30 minutes of focused work — one task only, no switching","Write 1 page: Who am I becoming?"]},
+   c:[{t:"75 push-ups",h:"Video of your set"},{t:"No fast food — home-cooked meal",h:"Photo of the meal"},{t:"Write 1 page: your \"why\"",h:"Photo of the page"}]},
   {w:1,t:"Quiet Work",
    r:`Real discipline is built without an audience.\n\nNo announcements. No external validation. No immediate reward. Just repetition — day after day, whether it feels meaningful or not.\n\nToday's challenges are designed to feel unremarkable. That's the point. Consistency doesn't announce itself. It compounds silently.`,
    q:"The results come later. The work happens now.",
-   c:["90 push-ups — break into sets as needed","No music during any task today","20-minute meditation — no phone, no music"]},
+   c:[{t:"90 push-ups",h:"Video of your set"},{t:"Drink a protein smoothie",h:"Photo of the glass"},{t:"Read 15 pages",h:"Photo of the pages"}]},
   {w:1,t:"The First Test of Continuity",
    r:`Starting is easy. Continuing is where most people disappear.\n\nFailure at this stage rarely comes from inability. It comes from underestimating how much showing up again — when nothing feels urgent, when the initial motivation has faded — actually matters.\n\nToday isn't a test of intensity. It's a test of reliability. The two are not the same.`,
    q:"Most people stop here. You didn't. That's the difference.",
-   c:["No phone for your first 4 hours","100 push-ups — break into sets as needed","Write 1 page: What am I grateful for?"]},
+   c:[{t:"Run 1.5 miles",h:"Photo of your tracker"},{t:"Eat a full salad",h:"Photo of the bowl"},{t:"Write 1 page: gratitude",h:"Photo of the page"}]},
 
   // ── WEEK 2: PRESSURE TESTING ──
   {w:2,t:"When It Gets Hard",
    r:`Nobody talks about what week two actually feels like.\n\nThe excitement of starting is gone. The finish line isn't visible yet. What's left is just the work — without the novelty, without the momentum, without the story you were telling yourself.\n\nThis is the week that separates people who want change from people who choose it. Hard days don't break discipline. They reveal it.`,
    q:"Hard days don't break discipline. They reveal it.",
-   c:["75 push-ups + 75 squats","15-minute journaling — no prompts, just write","2.5-minute plank"]},
+   c:[{t:"75 push-ups + 75 squats",h:"Video of your sets"},{t:"Finish a gallon of water",h:"Photo of the empty jug"},{t:"Read 20 pages",h:"Photo of the pages"}]},
   {w:2,t:"The Dip",
    r:`Every meaningful pursuit has a valley.\n\nIt comes after the initial rush fades and before the results become visible. It's the period where the old life is behind you and the new one hasn't fully arrived. Most people mistake the dip for a signal to quit. It isn't. It's a signal that you're in the right place.\n\nThe people who get through the dip don't avoid it. They expect it.`,
    q:"The dip is not the end of the road. It's the price of admission.",
-   c:["Run 1.5 miles","No social media for the entire day","Read 20 pages"]},
+   c:[{t:"Run 1.5 miles",h:"Photo of your tracker"},{t:"Eat a high-protein meal",h:"Photo of the plate"},{t:"2.5-minute plank",h:"Video of the plank"}]},
   {w:2,t:"Uncomfortable on Purpose",
    r:`Discomfort is not a sign something is wrong. It's a sign something is changing.\n\nMost people spend their lives engineering around discomfort — softer seats, easier paths, smaller asks. That engineering is the trap. Every time you avoid discomfort, you confirm to yourself that you can't handle it. Every time you walk into it deliberately, you prove the opposite.\n\nToday you don't wait for discomfort to find you. You go find it.`,
    q:"You don't build tolerance to hard things by avoiding them.",
-   c:["100 squats + 50 push-ups","Cold shower — 3 minutes, no easing in","Write 1 page: Where am I still avoiding discomfort?"]},
+   c:[{t:"60 burpees",h:"Video of your set"},{t:"Eat two servings of vegetables",h:"Photo of the plate"},{t:"Write 1 page",h:"Photo of the page"}]},
   {w:2,t:"Who You Are When No One Watches",
    r:`Identity isn't what you tell people you are. It's what you do when there's no audience.\n\nThe moment no one is watching is the moment that matters most. That's when the real standard is revealed — not the aspirational one, not the one you perform, but the one you actually live.\n\nDiscipline practiced in private is the only kind that holds. Everything else is theater.`,
    q:"Character is who you are in the dark.",
-   c:["3-minute plank","No entertainment today — work, reflect, execute only","Sets of 20 push-ups every hour for 5 hours"]},
+   c:[{t:"Run 2 miles",h:"Photo of your tracker"},{t:"Cook all meals from scratch today",h:"Photo of one plate"},{t:"Read 20 pages",h:"Photo of the pages"}]},
   {w:2,t:"The Middle Is Where Most Quit",
    r:`Week two is the hardest week of this program. Not because the challenges are the most difficult — but because the middle is where motivation collapses and only commitment is left.\n\nIf you are here, you are already past where most people stop. That is not an accident. That is a choice you made on every day that led to this one.\n\nDon't quit in the middle of your story.`,
    q:"The middle is not a setback. It's a filter.",
-   c:["Run 2 miles","Write a letter to your future self — one year from today","20-minute meditation"]},
+   c:[{t:"50 burpees + 60 push-ups",h:"Video of your sets"},{t:"No sugary drinks — water/black coffee only",h:"Photo of what you drank"},{t:"Write a letter to your future self",h:"Photo of the letter"}]},
   {w:2,t:"Controlled Chaos",
    r:`Life will not pause for your discipline program.\n\nSchedules break. Emergencies happen. The day you planned becomes a day you survive. This is not a problem — it is the test. A discipline system that only works under perfect conditions isn't a system. It's a preference.\n\nToday you execute your non-negotiables under pressure. Whatever the day throws at you, the standard holds.`,
    q:"Systems built in calm must be tested in chaos.",
-   c:["120 squats — break into sets as needed","Complete all non-negotiables before noon","Cold shower — 3 minutes"]},
+   c:[{t:"Run 2 miles",h:"Photo of your tracker"},{t:"Protein smoothie + gallon of water",h:"Photo of both"},{t:"Read 25 pages",h:"Photo of the pages"}]},
   {w:2,t:"Two Weeks In",
    r:`Stop and look at what you've done.\n\nTwo weeks ago you made a decision. Not a wish, not a plan — a decision. And every day since, you've shown up. Some days were clean. Some were ugly. It doesn't matter. The showing up is what counts.\n\nYou are not the same person who signed that contract. Don't go back to being them.`,
    q:"Two weeks of consistent action is more evidence than two years of intention.",
-   c:["No phone for your first 4 hours","Run 1 mile + 75 push-ups","Write 1 page: What's changed in two weeks?"]},
+   c:[{t:"75 push-ups + 1-mile run",h:"Video + tracker photo"},{t:"Eat a full salad",h:"Photo of the bowl"},{t:"Write 1 page: \"What's changed?\"",h:"Photo of the page"}]},
 
   // ── WEEK 3: IDENTITY SHIFT ──
   {w:3,t:"You Are Not the Same Person",
    r:`Something has shifted.\n\nIt may not be dramatic. You may not feel like a new person. But look at the evidence: fourteen days of showing up, of doing the thing when you didn't want to, of choosing the standard over the feeling. That's not nothing. That's the beginning of an identity.\n\nProtect what you're building. The old version of you will try to come back. Don't let it.`,
    q:"You are not who you were. Don't act like it.",
-   c:["15 dips + 40 push-ups + 50 squats","30-minute walk — no phone, no music","Read 20 pages"]},
+   c:[{t:"20 dips + 50 push-ups + 60 squats",h:"Video of your sets"},{t:"Meal-prep tomorrow's lunch",h:"Photo of the container"},{t:"Read 20 pages",h:"Photo of the pages"}]},
   {w:3,t:"Build the Evidence",
    r:`Every day you complete is a vote for who you are.\n\nIdentity isn't declared. It's accumulated. It's built from small, consistent actions that stack over time until the pattern becomes undeniable — to you, and to everyone watching.\n\nYou don't need to announce who you're becoming. You need to keep building the evidence.`,
    q:"The proof isn't what you say. It's what you do every single day.",
-   c:["Run 2 miles","3.5-minute plank","Write 1 page: What evidence do I have of my new identity?"]},
+   c:[{t:"Run 2 miles",h:"Photo of your tracker"},{t:"Eat a high-protein meal",h:"Photo of the plate"},{t:"Write 1 page: evidence of your new identity",h:"Photo of the page"}]},
   {w:3,t:"Standards Don't Take Days Off",
    r:`Your standard is not conditional.\n\nIt doesn't lower when you're tired. It doesn't shift when the week is hard. It doesn't take Saturdays. A standard that bends to circumstances isn't a standard — it's a preference. And preferences dissolve when things get difficult.\n\nThe whole point of this program is to convert preferences into standards. That conversion happens today, regardless of how today feels.`,
    q:"The day doesn't get to decide your standard. You do.",
-   c:["20 pike push-ups + 60 regular push-ups","No phone all morning","20-minute meditation"]},
+   c:[{t:"20 pike push-ups + 70 push-ups",h:"Video of your sets"},{t:"Finish a gallon of water",h:"Photo of the empty jug"},{t:"Read 25 pages",h:"Photo of the pages"}]},
   {w:3,t:"The Compound Effect",
    r:`Nothing dramatic has happened. Everything has changed.\n\nThat's what compounding looks like from the inside. No single day felt like a breakthrough. No single workout built the body. No single journal entry produced clarity. But the accumulation of all of them — quietly, invisibly — has been reshaping you.\n\nYou won't feel it until one day you look back and can't recognize where you started.`,
    q:"The results are invisible until they're undeniable.",
-   c:["Run 2.5 miles","Cold shower — 3 minutes","Write 1 page: What is compounding in my life right now?"]},
+   c:[{t:"Run 2.5 miles",h:"Photo of your tracker"},{t:"Clean eating — photo every meal",h:"Photos of your meals"},{t:"4-minute plank",h:"Video of the plank"}]},
   {w:3,t:"Discipline Is Freedom",
    r:`Most people think discipline is a constraint. They have it exactly backwards.\n\nThe person without discipline is the one who is trapped — by impulse, by distraction, by whoever or whatever demands their attention first. Structure is not a cage. It's what gives your day shape, your energy direction, and your life momentum.\n\nDiscipline is the thing that makes everything else possible.`,
    q:"Freedom is not the absence of structure. It's the result of it.",
-   c:["50 push-ups + 50 squats + 20 dips","No social media today","Two 30-minute focused work blocks — no interruptions"]},
+   c:[{t:"60 push-ups + 60 squats + 25 dips",h:"Video of your sets"},{t:"Replace a junk snack with whole food",h:"Photo of the swap"},{t:"Write 1 page",h:"Photo of the page"}]},
   {w:3,t:"Protect the Streak",
    r:`The number doesn't matter. What the number represents does.\n\nEvery day on that streak is a decision your old self would not have made. A moment where the excuse was available and you rejected it. Where the comfort was close and you chose the standard instead. That's not a number. That's a record of who you're becoming.\n\nProtect it — not because you're afraid to lose the streak, but because breaking it means letting the old version of you back in. That door should stay closed.`,
    q:"Every unbroken day is a vote for who you're becoming.",
-   c:["4-minute plank","Read 25 pages","Cold shower — 3 minutes"]},
+   c:[{t:"50 burpees",h:"Video of your set"},{t:"Drink a protein smoothie",h:"Photo of the glass"},{t:"Read 25 pages",h:"Photo of the pages"}]},
   {w:3,t:"Three Weeks In",
    r:`Three weeks.\n\nMost people don't make it here. Not because they couldn't — because they didn't decide to. You decided. And you kept deciding, every morning, every time the resistance showed up, every day the dip tried to swallow you.\n\nYou are one week away from proof. Don't stop now.`,
    q:"You didn't come this far to only come this far.",
-   c:["No phone for your first 4 hours","Run 2 miles + 50 push-ups","Write 1 page: Who have I become?"]},
+   c:[{t:"Run 2 miles + 60 push-ups",h:"Video + tracker photo"},{t:"Full salad + gallon of water",h:"Photo of both"},{t:"Write 1 page: \"Who have I become?\"",h:"Photo of the page"}]},
 
   // ── WEEK 4: PROOF ──
   {w:4,t:"The Final Push",
    r:`One week left. Same standard. No coasting.\n\nThis is where lesser programs tell you to celebrate, to reflect on your journey, to ease up. This program doesn't do that. The standard that got you here is the standard that finishes.\n\nWeek four is not the reward. Week four is the proof.`,
    q:"You don't ease up at the end. You prove you never needed to.",
-   c:["10 burpees + 50 push-ups + 50 squats","Run 2.5 miles","Write 1 page: Why I don't quit"]},
+   c:[{t:"15 burpees + 60 push-ups + 60 squats",h:"Video of your sets"},{t:"Eat a high-protein meal",h:"Photo of the plate"},{t:"Write 1 page: \"Why I don't quit\"",h:"Photo of the page"}]},
   {w:4,t:"Motivation Is Irrelevant",
    r:`By now, you should notice something.\n\nThe motivation that launched you on Day 1 is largely gone. The excitement has faded. The novelty has worn off. And yet — here you are. Doing the work. Not because you feel like it. Because this is who you are now.\n\nThat is the whole point. That is what this program was building toward all along. Motivation was never the fuel. The system is the fuel.`,
    q:"Motivation left. You're still here. That's the whole point.",
-   c:["5-minute plank","Read 30 pages","No phone until noon"]},
+   c:[{t:"5-minute plank",h:"Video of the plank"},{t:"Cook all three meals from scratch",h:"Photos of the plates"},{t:"Read 30 pages",h:"Photo of the pages"}]},
   {w:4,t:"Raise the Floor",
    r:`Your worst day now would have been your best day 30 days ago.\n\nThat is what a raised floor looks like. Not a dramatic transformation — a quiet, permanent elevation of your minimum. The version of you that existed before this program could not have done what you've done this week. That version is gone.\n\nDon't lower the floor once the program ends.`,
    q:"Raise the floor. The ceiling takes care of itself.",
-   c:["20 burpees + 60 push-ups + 40 squats","Cold shower — 3 minutes","20-minute meditation"]},
+   c:[{t:"25 burpees + 70 push-ups + 50 squats",h:"Video of your sets"},{t:"Eat two servings of vegetables",h:"Photo of the plate"},{t:"Write 1 page",h:"Photo of the page"}]},
   {w:4,t:"No Negotiation",
    r:`The boats are gone. There is only forward.\n\nOn Day 1, burning the boats was a metaphor. By now, it's a fact. There is no version of your life that includes going back to who you were before. That path no longer exists. You closed it, one day at a time, with every choice you made that your old self wouldn't have made.\n\nThere is nothing to negotiate with. There is only the work.`,
    q:"The old version of you is no longer available.",
-   c:["Run 3 miles","Three 30-minute focused work blocks","Write 1 page: What I refuse to go back to"]},
+   c:[{t:"Run 3 miles",h:"Photo of your tracker"},{t:"Finish a gallon of water",h:"Photo of the empty jug"},{t:"Write 1 page: \"What I refuse to go back to\"",h:"Photo of the page"}]},
   {w:4,t:"Proof of Concept",
    r:`You wanted proof that discipline could be built. Here it is.\n\nNot because a program told you to. Not because someone was watching. Because you made a decision and you honored it — through the dip, through the resistance, through the days you didn't want to show up but showed up anyway.\n\nYou were always capable of this. The program just removed every excuse you had for not doing it.`,
    q:"You are the proof. You always were.",
-   c:["25 burpees + 50 push-ups + 50 squats","4.5-minute plank","Read 30 pages"]},
+   c:[{t:"30 burpees + 75 push-ups + 60 squats",h:"Video of your sets"},{t:"Full day clean eating",h:"Photos of your meals"},{t:"Read 30 pages",h:"Photo of the pages"}]},
   {w:4,t:"The Standard Remains",
    r:`The program ends tomorrow. The standard doesn't.\n\nThis was never about 30 days. It was about what 30 days of consistent action would do to your identity — to the story you tell yourself about who you are and what you're capable of.\n\nThe program gave you a container. What you built inside it is yours. The question now is what you do with it.`,
    q:"The program ends. The person it built doesn't.",
-   c:["Run 3 miles + 30 push-ups","Cold shower — 3 minutes","Write 1 page: What happens on Day 31?"]},
+   c:[{t:"Run 3 miles + 50 push-ups",h:"Video + tracker photo"},{t:"Drink a protein smoothie",h:"Photo of the glass"},{t:"Write 1 page",h:"Photo of the page"}]},
   {w:4,t:"Two Days Left",
    r:`You can see the finish line now. That's when it gets dangerous.\n\nNot because the work gets harder — but because the mind starts calculating. It tells you that you've done enough. That two days is basically zero. That finishing strong doesn't matter because finishing is finishing.\n\nThat's the old version of you trying one last time. Don't negotiate. The standard that carried you 28 days carries you through 30. No exceptions. No coasting. Same standard. Two days.`,
    q:"You don't ease up two days before proof. You finish.",
-   c:["20 burpees + 75 push-ups + 50 squats","No phone until noon","Write 1 page: What does finishing mean to me?"]},
+   c:[{t:"25 burpees + 100 push-ups",h:"Video of your sets"},{t:"No sugary drinks all day",h:"Photo of what you drank"},{t:"Read 30 pages",h:"Photo of the pages"}]},
   {w:4,t:"The Eve of Proof",
    r:`Tomorrow you finish.\n\nNot the work — the proof. The proof that you can commit to something and see it through. The proof that discipline isn't a personality trait you're born with — it's a standard you decide to live by. The proof that the person who signed that contract 29 days ago was not lying.\n\nYou showed up. Every day. Some days clean, some days ugly, all days counted. Tomorrow is not the end of something. Tomorrow is what everything before it was building toward. Go to sleep knowing that.`,
    q:"Tomorrow isn't the end. It's the evidence.",
-   c:["Run 3 miles","Cold shower — 3 minutes","Write 1 page: Who do I want to be on Day 31?"]},
+   c:[{t:"Run 3 miles",h:"Photo of your tracker"},{t:"Full salad + gallon of water",h:"Photo of both"},{t:"Write 1 page: \"Who I want to be on Day 31\"",h:"Photo of the page"}]},
   {w:4,t:"Day 30",
    r:`You made it.\n\nThirty days. Every non-negotiable. Every challenge. Every reflection. Every day you didn't want to be here and showed up anyway.\n\nThis is not the end. This is the floor you stand on for the next 30 days, and the 30 after that. The work you did here is not the destination — it's the standard. Your standard now.\n\nWelcome to the other side. Now go again.`,
    q:"The finish line is the starting line.",
-   c:["30 burpees + 100 push-ups","No phone — full morning","Write your mission statement for the next 30 days"]},
+   c:[{t:"30 burpees + 100 push-ups",h:"Video of your sets"},{t:"Cook a celebration meal from scratch",h:"Photo of the plate"},{t:"Write your 30-day mission statement",h:"Photo of the page"}]},
 ];
+window.DD = DD;
 
 // ═══════════════════════════════════
 // STATE
@@ -1235,6 +1236,7 @@ function checkBackupReminder(){
 }
 function showMain(){
   if(window.S && window.S.started) S=window.S;
+  var _ab=document.getElementById('admin-btn'); if(_ab) _ab.style.display=(window.UID==='VKhgQzYfhIWwGsaxgdoeh0vyVVe2')?'inline-block':'none';
   syncDayToTime();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('sc-main').classList.add('active');
@@ -1266,7 +1268,7 @@ function renderToday(){
   const ce=document.getElementById('t-chs');ce.innerHTML='';
   DD[d-1].c.forEach((ch,i)=>{
     const done=sd.chDone&&sd.chDone[i];
-    const el=mkCI(ch,done,()=>{togCH(d,i);renderToday();});
+    const el=mkCI(ch.t,done,()=>{togCH(d,i);renderToday();});
     ce.appendChild(el);
   });
   updProg(d);
@@ -1360,7 +1362,7 @@ function renderProgram(){
     const locked=dayN>S.cd;const comp=S.days[dayN]&&S.days[dayN].completed;const missed=S.days[dayN]&&S.days[dayN].missed&&!comp;const isT=dayN===S.cd;
     const dc=document.createElement('div');
     dc.className='dc'+(comp?' completed':'')+(missed?' missed':'')+(isT&&!comp?' is-today':'')+(locked?' locked':'');
-    dc.innerHTML=`<div class="dci"><div class="dn">${dayN<10?'0'+dayN:dayN}</div><div class="dic"><div class="dct">${d.t}</div><div class="dcm" style="font-size:10px">${missed?'<span style=\'color:var(--rd2);font-family:var(--fd);font-weight:700;letter-spacing:1px\'>⚠ MISSED — STREAK RESET</span>':d.c.join(' · ')}</div></div><div class="dico">${comp?'✓':missed?'✗':locked?'🔒':'→'}</div></div>`;
+    dc.innerHTML=`<div class="dci"><div class="dn">${dayN<10?'0'+dayN:dayN}</div><div class="dic"><div class="dct">${d.t}</div><div class="dcm" style="font-size:10px">${missed?'<span style=\'color:var(--rd2);font-family:var(--fd);font-weight:700;letter-spacing:1px\'>⚠ MISSED — STREAK RESET</span>':d.c.map(function(x){return x.t}).join(' · ')}</div></div><div class="dico">${comp?'✓':missed?'✗':locked?'🔒':'→'}</div></div>`;
     if(!locked&&!missed)dc.onclick=()=>openDay(dayN);el.appendChild(dc);
   });
 }
@@ -1403,7 +1405,7 @@ function openDay(dn){
     // Challenge check item
     const el=document.createElement('div');
     el.className='ci'+(done?' done':'');
-    el.innerHTML=`<div class="cbox">${done?'✓':''}</div><div class="ctext">${ch}</div>`;
+    el.innerHTML=`<div class="cbox">${done?'✓':''}</div><div class="ctext">${ch.t}</div>`;
     el.onclick=()=>{
       // Check if proof is required and uploaded
       if(!S.days[dn] || !S.days[dn].chProof || !S.days[dn].chProof[i]) {
@@ -1422,7 +1424,7 @@ function openDay(dn){
     
     // Proof uploader
     const existingProof = sd.chProof && sd.chProof[i];
-    const proofUploader = createProofUploader(dn, i, existingProof ? existingProof.url : null, existingProof ? existingProof.path : null);
+    const proofUploader = createProofUploader(dn, i, existingProof ? existingProof.url : null, existingProof ? existingProof.path : null, ch.h);
     
     // Add proof required message
     const reqMsg = document.createElement('div');
@@ -1620,7 +1622,7 @@ function dismissReminder() {
 // PROOF UPLOAD SYSTEM
 // ═══════════════════════════════════
 
-function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingProofPath) {
+function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingProofPath, proofHint) {
   const wrapperId = 'proof-' + dayNum + '-' + challengeIdx;
   
   const wrapper = document.createElement('div');
@@ -1631,7 +1633,7 @@ function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingPro
   
   wrapper.innerHTML = `
     <div class="proof-label ${existingProofUrl ? 'verified' : ''}">
-      <span>${existingProofUrl ? '✓ PROOF SUBMITTED' : 'PROOF REQUIRED'}</span>
+      <span>${existingProofUrl ? '✓ PROOF SUBMITTED' : (proofHint ? proofHint.toUpperCase() : 'PROOF REQUIRED')}</span>
       ${existingProofUrl ? '<button class="proof-btn proof-btn-remove" onclick="removeProof('+dayNum+','+challengeIdx+')" title="Remove proof">×</button>' : ''}
     </div>
     <div class="proof-preview" id="prev-${wrapperId}" style="${existingProofUrl ? 'display:block' : 'display:none'}">
@@ -1644,7 +1646,7 @@ function createProofUploader(dayNum, challengeIdx, existingProofUrl, existingPro
       <button class="proof-btn proof-btn-upload" onclick="triggerProofUpload(${dayNum},${challengeIdx})">
         📷 Upload Photo or Video
       </button>
-      <span style="font-size:10px;color:var(--di)">Photo or video required to complete</span>
+      <span style="font-size:10px;color:var(--di)">${proofHint ? proofHint : 'Photo or video required to complete'}</span>
     </div>
     <input type="file" id="file-${wrapperId}" accept="image/*,video/*" style="display:none" 
       onchange="handleProofFile(${dayNum},${challengeIdx},this)">
@@ -1786,6 +1788,8 @@ function hasSeenWelcome() {
 let adminDay = null;
 
 function openAdmin() {
+  // Admin is restricted to the owner account only.
+  if (!window.UID || window.UID !== 'VKhgQzYfhIWwGsaxgdoeh0vyVVe2') { return; }
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('sc-admin').classList.add('active');
   renderAdminDayList();
@@ -1826,9 +1830,9 @@ function openDayEditor(dayN) {
   document.getElementById('admin-title').value = content.t || d.t;
   document.getElementById('admin-reading').value = content.r || d.r;
   document.getElementById('admin-quote').value = content.q || d.q;
-  document.getElementById('admin-c1').value = (content.c && content.c[0]) || d.c[0];
-  document.getElementById('admin-c2').value = (content.c && content.c[1]) || d.c[1];
-  document.getElementById('admin-c3').value = (content.c && content.c[2]) || d.c[2];
+  document.getElementById('admin-c1').value = ((content.c && content.c[0]) || d.c[0]).t;
+  document.getElementById('admin-c2').value = ((content.c && content.c[1]) || d.c[1]).t;
+  document.getElementById('admin-c3').value = ((content.c && content.c[2]) || d.c[2]).t;
   document.getElementById('admin-editor').style.display = 'block';
   document.getElementById('admin-editor').scrollIntoView({behavior:'smooth'});
 }
@@ -1840,9 +1844,9 @@ function pushContentUpdate() {
     r: document.getElementById('admin-reading').value.trim(),
     q: document.getElementById('admin-quote').value.trim(),
     c: [
-      document.getElementById('admin-c1').value.trim(),
-      document.getElementById('admin-c2').value.trim(),
-      document.getElementById('admin-c3').value.trim()
+      {t: document.getElementById('admin-c1').value.trim(), h: (DD[adminDay-1].c[0] && DD[adminDay-1].c[0].h) || 'Photo or video'},
+      {t: document.getElementById('admin-c2').value.trim(), h: (DD[adminDay-1].c[1] && DD[adminDay-1].c[1].h) || 'Photo or video'},
+      {t: document.getElementById('admin-c3').value.trim(), h: (DD[adminDay-1].c[2] && DD[adminDay-1].c[2].h) || 'Photo or video'}
     ],
     updatedAt: new Date().toISOString()
   };
@@ -1877,9 +1881,9 @@ function resetDayContent() {
   document.getElementById('admin-title').value = d.t;
   document.getElementById('admin-reading').value = d.r;
   document.getElementById('admin-quote').value = d.q;
-  document.getElementById('admin-c1').value = d.c[0];
-  document.getElementById('admin-c2').value = d.c[1];
-  document.getElementById('admin-c3').value = d.c[2];
+  document.getElementById('admin-c1').value = d.c[0].t;
+  document.getElementById('admin-c2').value = d.c[1].t;
+  document.getElementById('admin-c3').value = d.c[2].t;
   document.getElementById('admin-status').textContent = 'Reset to original';
   if (!window.contentOverrides) window.contentOverrides = {};
   delete window.contentOverrides['day_'+adminDay];
@@ -1963,7 +1967,8 @@ function renderProofThumbnails(userData) {
       const isVideo = proof.url.includes('.mp4') || proof.url.includes('.mov') || proof.url.includes('.webm');
       const dayNum = parseInt(dayKey);
       const chNum = parseInt(chKey);
-      const challengeName = (window.DD && window.DD[dayNum-1] && window.DD[dayNum-1].c) ? window.DD[dayNum-1].c[chNum] : 'Challenge '+(chNum+1);
+      const _ch = (window.DD && window.DD[dayNum-1] && window.DD[dayNum-1].c) ? window.DD[dayNum-1].c[chNum] : null;
+      const challengeName = _ch ? (_ch.t || _ch) : 'Challenge '+(chNum+1);
       
       html += '<div style="margin-bottom:12px">' +
         '<div style="font-size:10px;color:var(--mu);font-family:var(--fd);font-weight:700;letter-spacing:1px;margin-bottom:4px">DAY ' + dayNum + ' · ' + challengeName.substring(0,40) + '</div>' +
