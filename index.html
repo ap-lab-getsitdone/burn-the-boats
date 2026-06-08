@@ -790,16 +790,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
     <div class="tab" onclick="swTab('program',this)">Program</div>
   </div>
 
-  <!-- Backup Reminder Banner -->
-<div id="backup-banner" style="display:none;background:#1a1200;border-bottom:1px solid var(--am);padding:10px 16px;font-size:11px;color:var(--am2)">
-  <div style="display:flex;align-items:center;justify-content:space-between">
-    <span>💾 Back up your progress — it's been 7+ days</span>
-    <div style="display:flex;gap:8px">
-      <button onclick="dismissBackup(true)" style="background:var(--am);color:#000;border:none;padding:4px 10px;border-radius:2px;font-size:10px;font-family:var(--fd);font-weight:700;cursor:pointer">BACKUP NOW</button>
-      <button onclick="dismissBackup(false)" style="background:transparent;color:var(--mu);border:none;font-size:16px;cursor:pointer;padding:0 4px">×</button>
-    </div>
-  </div>
-</div>
+  <!-- Backup banner removed — cloud sync makes manual backup redundant -->
 
 <div id="tab-today" class="tab-panel active">
     <div class="content">
@@ -850,18 +841,10 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div id="prog-days"></div>
       
       <div style="margin-top:24px">
-        <div class="slbl">Data & Backup</div>
+        <div class="slbl">Your Progress</div>
         <div class="card">
-          <div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6">
-            Your progress is saved to Firebase cloud and your device. 
-            Use the backup button to download a copy in case you ever need to restore.
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn-s" style="flex:1;text-align:center" onclick="exportProgress()">↓ Download Backup</button>
-            <button class="btn-s" style="flex:1;text-align:center" onclick="triggerImport()">↑ Restore Backup</button>
-          </div>
-          <div style="margin-top:10px;font-size:10px;color:var(--di);line-height:1.5">
-            Download backup weekly. If you clear browser data, restore from your backup file.
+          <div style="font-size:12px;color:var(--mu);line-height:1.6">
+            Your progress saves automatically to the cloud and syncs across every device you sign in on. Nothing to back up — just keep showing up.
           </div>
         </div>
       </div>
@@ -1512,6 +1495,24 @@ function setNNP(v){
 
 function compDay(){
   if(!S.days[aDay])S.days[aDay]={};
+
+  // Accountability gate: challenges are optional, but any UNCHECKED non-negotiable
+  // requires the user to write why they missed it before the day can be completed.
+  const sd=S.days[aDay];
+  const anyNNMissed = S.nns.some((nn,i)=> !(sd.nnDone && sd.nnDone[i]));
+  if(anyNNMissed){
+    const reason=document.getElementById('rf-fail').value.trim();
+    if(!reason){
+      // Reveal the reflection section and focus it.
+      if(typeof setNNP==='function') setNNP(false);
+      document.getElementById('nn-fail').style.display='block';
+      alert('You left a non-negotiable unchecked. Before you finish the day, answer honestly: which one, and why did you miss it?');
+      document.getElementById('rf-fail').scrollIntoView({behavior:'smooth',block:'center'});
+      document.getElementById('rf-fail').focus();
+      return;
+    }
+  }
+
   S.days[aDay].rfFail=document.getElementById('rf-fail').value;
   S.days[aDay].rfFix=document.getElementById('rf-fix').value;
   S.days[aDay].rfId=document.getElementById('rf-id').value;
@@ -1761,7 +1762,8 @@ function removeProof(dayNum, challengeIdx) {
   const wrapperId = 'proof-' + dayNum + '-' + challengeIdx;
   const wrapper = document.getElementById(wrapperId);
   if (wrapper) {
-    const newUploader = createProofUploader(dayNum, challengeIdx, null, null);
+    var _hint = (DD[dayNum-1] && DD[dayNum-1].c && DD[dayNum-1].c[challengeIdx]) ? DD[dayNum-1].c[challengeIdx].h : null;
+    const newUploader = createProofUploader(dayNum, challengeIdx, null, null, _hint);
     wrapper.parentNode.replaceChild(newUploader, wrapper);
   }
   
