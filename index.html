@@ -253,6 +253,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   onAuthStateChanged(auth, (user) => {
     if (user) {
       UID = user.uid;
+      window.UID = user.uid;
       console.log('Signed in:', UID);
       localStorage.setItem('btb_auth_uid', UID);
       
@@ -315,6 +316,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       });
     } else {
       UID = null;
+      window.UID = null;
       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
       document.getElementById('sc-auth').classList.add('active');
     }
