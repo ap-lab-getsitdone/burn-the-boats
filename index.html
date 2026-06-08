@@ -1279,7 +1279,16 @@ function renderToday(){
   const ce=document.getElementById('t-chs');ce.innerHTML='';
   DD[d-1].c.forEach((ch,i)=>{
     const done=sd.chDone&&sd.chDone[i];
-    const el=mkCI(ch.t,done,()=>{togCH(d,i);renderToday();});
+    const el=mkCI(ch.t,done,()=>{
+      const isDone=S.days[d]&&S.days[d].chDone&&S.days[d].chDone[i];
+      // Allow unchecking freely. To CHECK, proof must exist first.
+      if(!isDone && !hasProof(d,i)){
+        alert('Upload your photo or video proof first. Tap "Open Today\u2019s Full Entry" to add it.');
+        openDay(d);
+        return;
+      }
+      togCH(d,i);renderToday();
+    });
     ce.appendChild(el);
   });
   updProg(d);
