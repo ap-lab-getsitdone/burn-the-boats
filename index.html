@@ -1238,6 +1238,13 @@ function checkBackupReminder(){
 }
 function showMain(){
   if(window.S && window.S.started) S=window.S;
+  // Normalize state shape — Firebase records can be missing fields (e.g. nns),
+  // which would otherwise crash the renderers and kill all page interaction.
+  if(!Array.isArray(S.nns)) S.nns=[];
+  if(!S.days||typeof S.days!=='object'||Array.isArray(S.days)) S.days=S.days&&typeof S.days==='object'?Object.assign({},S.days):{};
+  if(!S.debrief||typeof S.debrief!=='object') S.debrief={};
+  if(typeof S.cd!=='number'||S.cd<1||S.cd>30) S.cd=Math.min(Math.max(parseInt(S.cd)||1,1),30);
+  if(typeof S.streak!=='number') S.streak=parseInt(S.streak)||0;
   var _ab=document.getElementById('admin-btn'); if(_ab) _ab.style.display=(window.UID==='VKhgQzYfhIWwGsaxgdoeh0vyVVe2')?'inline-block':'none';
   syncDayToTime();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1260,6 +1267,8 @@ function swTab(name,el){
 // TODAY TAB
 // ═══════════════════════════════════
 function renderToday(){
+  if(!Array.isArray(S.nns)) S.nns=[];
+  if(!S.days||typeof S.days!=='object') S.days={};
   const d=S.cd;const sd=S.days[d]||{};
   const ne=document.getElementById('t-nns');ne.innerHTML='';
   S.nns.forEach((nn,i)=>{
