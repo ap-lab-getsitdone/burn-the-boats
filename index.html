@@ -262,6 +262,26 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       // Always load directly from Firebase - ignore localStorage completely
       // Helper: hydrate state from a data object and enter the app.
       function enterAppWith(data) {
+        // Distinguish a real user from someone who only typed non-negotiables then bailed.
+        // Real progress = signed, OR has a start timestamp, OR has actually engaged with a day
+        // (days data present, or advanced past day 1). Existing accounts may predate the
+        // 'started' flag, so we do NOT rely on it alone.
+        var hasDayData = data && data.days && typeof data.days==='object' &&
+                         Object.keys(data.days).some(function(k){ var d=data.days[k]; return d && (d.completed || d.chDone || d.nnDone || d.chProof || d.resist || d.rfId || d.rfNotes); });
+        var trulyStarted = data && (data.started === 'yes' || data.started === true || data.sig ||
+                           data.dayStartTimestamp || (typeof data.cd==='number' && data.cd > 1) || hasDayData);
+        if (!trulyStarted) {
+          // Only non-negotiables saved — resume setup, pre-filling what they entered.
+          window.S = data || {};
+          document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+          document.getElementById('sc-setup').classList.add('active');
+          try {
+            if (data && Array.isArray(data.nns)) {
+              for (var k=0;k<data.nns.length && k<5;k++){ var el=document.getElementById('nn'+(k+1)); if(el) el.value=data.nns[k]; }
+            }
+          } catch(e) {}
+          return;
+        }
         window.S = data;
         window.S.started = 'yes';
         if (!window.S.nns) window.S.nns = [];
@@ -771,6 +791,11 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div class="streak">🔥 <span id="streak-n">0</span></div>
     </div>
   </div>
+  <!-- Live clock -->
+  <div id="live-clock" style="display:flex;align-items:baseline;justify-content:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--b2);background:var(--s2)">
+    <span id="clock-time" style="font-family:var(--fd);font-weight:700;font-size:18px;letter-spacing:2px;color:var(--tx)">--:--:--</span>
+    <span id="clock-date" style="font-family:var(--fd);font-weight:700;font-size:10px;letter-spacing:2px;color:var(--mu);text-transform:uppercase">—</span>
+  </div>
   <!-- Reminder Banner -->
   <div class="reminder-banner" id="reminder-banner">
     <div class="reminder-inner">
@@ -1219,6 +1244,26 @@ function syncDayToTime(){
 function checkBackupReminder(){ 
   // placeholder - backup reminder feature
 }
+function startClock(){
+  function tick(){
+    var now=new Date();
+    var t=document.getElementById('clock-time');
+    var d=document.getElementById('clock-date');
+    if(t){
+      var h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
+      var ap=h>=12?'PM':'AM'; var h12=h%12; if(h12===0)h12=12;
+      var pad=function(n){return n<10?'0'+n:''+n;};
+      t.textContent=pad(h12)+':'+pad(m)+':'+pad(s)+' '+ap;
+    }
+    if(d){
+      d.textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    }
+  }
+  tick();
+  if(window._clockTimer) clearInterval(window._clockTimer);
+  window._clockTimer=setInterval(tick,1000);
+}
+
 function showMain(){
   if(window.S && window.S.started) S=window.S;
   // Normalize state shape — Firebase records can be missing fields (e.g. nns),
@@ -1235,7 +1280,7 @@ function showMain(){
   document.getElementById('streak-n').textContent=S.streak;
   const rank=getRank(S.streak);
   document.getElementById('rank-display').textContent=rank.name;
-  const wk=Math.ceil(S.cd/7);
+  const wk=(DD[S.cd-1] && DD[S.cd-1].w) ? DD[S.cd-1].w : Math.min(Math.ceil(S.cd/7),4);
   document.getElementById('main-lbl').textContent='Day '+S.cd+' of 30 · Week '+wk+': '+WK_NAMES[wk-1];
   renderToday();renderWeek();renderProgram();window.scrollTo(0,0);checkBackupReminder();checkReminderBanner();
 }
@@ -1300,15 +1345,19 @@ function updProg(d){
 // WEEK TAB
 // ═══════════════════════════════════
 function renderWeek(){
-  const wk=Math.ceil(S.cd/7);const ws=(wk-1)*7+1;const we=Math.min(wk*7,30);
-  const nnPD=S.nns.length;const maxNN=nnPD*7;const maxCH=21;
+  const wk=(DD[S.cd-1] && DD[S.cd-1].w) ? DD[S.cd-1].w : Math.min(Math.ceil(S.cd/7),4);
+  // Real day range for this week, read from the data (week 4 spans 9 days).
+  let ws=31, we=0;
+  DD.forEach(function(dd,idx){ if(dd.w===wk){ const n=idx+1; if(n<ws)ws=n; if(n>we)we=n; } });
+  const daysInWeek=we-ws+1;
+  const nnPD=S.nns.length;const maxNN=nnPD*daysInWeek;const maxCH=daysInWeek*3;
   let tNN=0,tCH=0;
   for(let d=ws;d<=we;d++){const sd=S.days[d]||{};tNN+=Object.values(sd.nnDone||{}).filter(Boolean).length;tCH+=Object.values(sd.chDone||{}).filter(Boolean).length;}
   document.getElementById('w-nn').textContent=tNN;
   document.getElementById('w-ch').textContent=tCH;
   document.getElementById('w-st').textContent=S.streak;
-  const nnTh=Math.floor(maxNN*0.86);const nnP=tNN>=nnTh;const chP=tCH>=18;
-  document.getElementById('w-thresh').innerHTML=`<div class="tr ${nnP?'pass':'fail'}">${nnP?'✓':'✗'} Non-negotiables: ${tNN} / ${maxNN} (need ${nnTh}+)</div><div class="tr ${chP?'pass':'fail'}">${chP?'✓':'✗'} Challenges: ${tCH} / ${maxCH} (need 18+)</div>`;
+  const nnTh=Math.floor(maxNN*0.86);const chTh=Math.floor(maxCH*0.86);const nnP=tNN>=nnTh;const chP=tCH>=chTh;
+  document.getElementById('w-thresh').innerHTML=`<div class="tr ${nnP?'pass':'fail'}">${nnP?'✓':'✗'} Non-negotiables: ${tNN} / ${maxNN} (need ${nnTh}+)</div><div class="tr ${chP?'pass':'fail'}">${chP?'✓':'✗'} Challenges: ${tCH} / ${maxCH} (need ${chTh}+)</div>`;
 
   // Resistance graph
   const rg=document.getElementById('resist-graph');const rd=document.getElementById('resist-days');
@@ -1341,7 +1390,7 @@ function renderWeek(){
 }
 
 function saveDB(){
-  const wk=Math.ceil(S.cd/7);
+  const wk=(DD[S.cd-1] && DD[S.cd-1].w) ? DD[S.cd-1].w : Math.min(Math.ceil(S.cd/7),4);
   if(!S.debrief)S.debrief={};
   S.debrief[wk]={hard:document.getElementById('db-hard').value,exc:document.getElementById('db-exc').value,next:document.getElementById('db-next').value};
   save();const b=event.target;b.textContent='Saved ✓';b.style.color='var(--gn)';b.style.borderColor='var(--gn)';
@@ -2011,6 +2060,7 @@ function renderProofThumbnails(userData) {
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('sig-date');
   if(el)el.textContent='Date: '+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  startClock();
   // Auth state listener handles navigation
 });
 </script>
