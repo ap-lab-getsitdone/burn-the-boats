@@ -781,7 +781,20 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:12px">
       <div>
-        <div class="brand">BURN THE <span>BOATS</span></div>
+        <div class="brand-emblem" aria-label="Burn the Boats" style="display:flex;align-items:center;gap:9px">
+          <svg width="30" height="30" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+            <!-- flames -->
+            <path d="M24 4c2.6 3.4 1.2 6-0.2 7.8C22 14.2 21 16 21.4 18.4c-1.8-0.8-3-2.6-3-4.8-1.8 1.8-2.8 4.2-2.8 6.8 0 4.7 3.8 8.4 8.4 8.4s8.4-3.7 8.4-8.4c0-5.2-3.4-8.8-5.2-11C25.8 8.4 25.4 6 24 4z" fill="var(--rd2)"/>
+            <path d="M24 12c1.4 2 0.8 3.6 0 4.8-1 1.4-1.6 2.6-1.4 4.2-1.6-0.8-2.2-2.6-1.8-4.4-1 1.2-1.6 2.8-1.6 4.4 0 2.8 2.2 4.8 4.8 4.8s4.8-2 4.8-4.8c0-2.8-2-4.8-3-6.4-0.6-1-0.8-1.8-0.8-2.6z" fill="var(--am2)"/>
+            <!-- waterline -->
+            <path d="M4 38c2.4 0 2.4 2 4.8 2s2.4-2 4.8-2 2.4 2 4.8 2 2.4-2 4.8-2 2.4 2 4.8 2 2.4-2 4.8-2 2.4 2 4.8 2 2.4-2 4.8-2" stroke="var(--rd)" stroke-width="1.6" stroke-linecap="round" opacity="0.5"/>
+            <!-- hull -->
+            <path d="M9 31h30l-4 6c-0.5 0.8-1.4 1.3-2.4 1.3H15.4c-1 0-1.9-0.5-2.4-1.3L9 31z" fill="var(--rd)"/>
+            <!-- mast -->
+            <rect x="23.2" y="20" width="1.6" height="11" fill="var(--rd)"/>
+          </svg>
+          <span class="brand" style="font-size:18px">BURN THE <span>BOATS</span></span>
+        </div>
         <div class="day-ind" id="main-lbl">Day 1 of 30</div>
       </div>
       <button id="admin-btn" onclick="openAdmin()" style="display:none;background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
