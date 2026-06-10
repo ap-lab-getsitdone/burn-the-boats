@@ -364,11 +364,14 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 
   // ── FIREBASE SAVE (replaces localStorage save) ──
   window.fbSave = function(data) {
-    if (!UID) { console.warn('Cannot save - not signed in'); return; } // Guard against null UID
+    if (!UID) { console.warn('Cannot save - not signed in'); return Promise.resolve(false); }
     data._lastSaved = Date.now();
     data._deviceId = UID;
-    set(userRef(), data).catch(e => console.warn('Firebase save failed:', e));
     try { localStorage.setItem('btb30v2', JSON.stringify(data)); } catch(e) {}
+    // Resolves true on a confirmed cloud write, false on failure — never rejects.
+    return set(userRef(), data)
+      .then(function(){ return true; })
+      .catch(function(e){ console.warn('Firebase save failed:', e); return false; });
   };
 
   // ── FIREBASE LOAD (replaces localStorage load) ──
@@ -416,6 +419,15 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
     onValue(userRef(), (snapshot) => {
       if (snapshot.exists()) {
         const newData = snapshot.val();
+        // Normalize before assignment — partial records (missing nns, array-shaped
+        // days) crashed the renderers once already. Never trust raw cloud shape.
+        if (newData) {
+          if (!Array.isArray(newData.nns)) newData.nns = [];
+          if (!newData.days || typeof newData.days !== 'object') newData.days = {};
+          else if (Array.isArray(newData.days)) newData.days = Object.assign({}, newData.days);
+          if (!newData.debrief || typeof newData.debrief !== 'object') newData.debrief = {};
+          if (typeof newData.cd !== 'number') newData.cd = parseInt(newData.cd) || 1;
+        }
         const oldCd = window.S ? window.S.cd : null;
         window.S = newData;
         // Only re-render if we're on the main screen and something changed
@@ -476,7 +488,10 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
     get(ref(db, 'users')).then(snapshot => {
       if (snapshot.exists()) callback(snapshot.val());
       else callback({});
-    }).catch(() => callback({}));
+    }).catch((e) => {
+      console.warn('Admin tester fetch failed:', e);
+      callback(null, (e && (e.code || e.message)) || 'unknown error');
+    });
   };
 
   // Listen for content overrides and apply them live
@@ -838,7 +853,13 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       <div id="t-chs"></div>
       <div class="pw" style="margin-top:14px"><div class="pf" id="t-pf" style="width:0%"></div></div>
       <div class="plbl" id="t-pl">0 of 0 complete</div>
-      <button class="btn btn-p" style="margin-top:16px" onclick="openDay(S.cd)">Open Today's Full Entry →</button>
+      <button class="btn btn-p" id="open-entry-btn" style="margin-top:16px" onclick="openDay(S.cd)">Open Today's Full Entry →</button>
+      <div id="trial-lock" style="display:none;margin-top:16px;border:1px solid var(--rd);background:var(--s1);padding:18px 16px;text-align:center;border-radius:2px">
+        <div style="font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:3px;color:var(--rd2)">TRIAL COMPLETE</div>
+        <div style="font-size:12px;color:var(--mu);line-height:1.7;margin-top:8px">7 days. You held the standard.<br>To unlock Days 8&ndash;30: finish your feedback, refer one person, and enter the code you receive.</div>
+        <input id="unlock-code" type="text" autocapitalize="characters" autocomplete="off" placeholder="ENTER CODE" style="margin-top:14px;width:100%;max-width:240px;background:var(--bg);border:1px solid var(--b2);color:var(--tx);padding:10px;text-align:center;font-family:var(--fd);font-weight:700;letter-spacing:3px;font-size:14px;border-radius:2px">
+        <button class="btn btn-p" style="margin-top:10px;max-width:240px" onclick="tryUnlock()">UNLOCK THE FULL 30</button>
+      </div>
     </div>
   </div>
 
@@ -1157,15 +1178,22 @@ function load(callback){
     if(callback) callback();
   }
 }
-function save(){
-  // Always save to localStorage first as immediate backup
+function save(immediate){
+  // localStorage is written instantly, every time — the on-device source of truth.
   try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
-  // Then sync to Firebase
-  if(window.fbSave){ 
-    window.showSyncStatus&&window.showSyncStatus('saving'); 
-    window.fbSave(S); 
-    window.showSyncStatus&&setTimeout(()=>window.showSyncStatus('saved'),600); 
-  }
+  if(!window.fbSave) return;
+  // Cloud writes are debounced so rapid taps (slider drags, quick toggles) become
+  // one write instead of dozens. Critical moments pass immediate=true.
+  clearTimeout(window._fbSaveTimer);
+  const doWrite=function(){
+    window._fbSavePending=false;
+    window.showSyncStatus&&window.showSyncStatus('saving');
+    const p=window.fbSave(S);
+    if(p&&p.then){ p.then(function(ok){ window.showSyncStatus&&window.showSyncStatus(ok?'saved':'offline'); }); }
+    else { window.showSyncStatus&&window.showSyncStatus('saved'); }
+  };
+  if(immediate){ doWrite(); }
+  else { window._fbSavePending=true; window._fbSaveTimer=setTimeout(doWrite,700); }
 }
 
 // ═══════════════════════════════════
@@ -1176,7 +1204,7 @@ function goPh(id){document.querySelectorAll('.sph').forEach(p=>p.classList.remov
 function saveNNs(){
   const v=['nn1','nn2','nn3','nn4','nn5'].map(id=>document.getElementById(id).value.trim()).filter(Boolean);
   if(v.length<3){alert('Please enter at least 3 non-negotiables.');return;}
-  S.nns=v;save();goPh('ph-resistance');
+  S.nns=v;save(true);goPh('ph-resistance');
 }
 
 function signBegin(){
@@ -1204,6 +1232,43 @@ function signBegin(){
 // marked missed, the streak hard-resets to 0, and the app advances
 // to whatever day the calendar says it should be on.
 const DAY_MS = 24 * 60 * 60 * 1000;
+const TRIAL_END_DAY = 7;
+const UNLOCK_CODE = 'KEEPGOING';
+// Master switch for the Day 7 trial wall. false = wall fully dormant (program
+// runs 1-30 uninterrupted). Flip to true and redeploy when ready to arm it.
+const TRIAL_WALL_ENABLED = false;
+// True for accounts subject to the trial wall (no full access, not the owner).
+function subjectToTrialWall(){ return TRIAL_WALL_ENABLED && !S.fullAccess && window.UID !== 'VKhgQzYfhIWwGsaxgdoeh0vyVVe2'; }
+// True once Day 7 is completed and the account is still walled.
+function trialWalled(){ return subjectToTrialWall() && S.days && S.days[7] && S.days[7].completed; }
+function tryUnlock(){
+  const el=document.getElementById('unlock-code');
+  if(!el) return;
+  const v=(el.value||'').trim().toUpperCase();
+  if(!v) return;
+  if(v===UNLOCK_CODE){
+    S.fullAccess=true;
+    S.cd=8;
+    // Restart the 24h clock so Day 8 begins NOW with a full fresh window —
+    // expected day = 1 + floor(elapsed/DAY_MS) = 8 at this instant.
+    S.dayStartTimestamp=Date.now()-(TRIAL_END_DAY*DAY_MS);
+    save(true);
+    alert('Code accepted. The full program is open \u2014 Day 8 starts now. Same standard.');
+    showMain();
+  } else {
+    el.value='';
+    alert('That is not the code.');
+  }
+}
+function flushSave(){
+  if(window._fbSavePending){
+    clearTimeout(window._fbSaveTimer);
+    window._fbSavePending=false;
+    if(window.fbSave) window.fbSave(S);
+  }
+}
+window.addEventListener('pagehide',flushSave);
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flushSave(); });
 
 function computeExpectedDay(){
   // Returns the day number (1-30) the user SHOULD be on based on elapsed time.
@@ -1213,6 +1278,9 @@ function computeExpectedDay(){
   const expected = 1 + windows;
   if(expected < 1) return 1;
   if(expected > 30) return 30;
+  // Trial wall: time cannot push a walled account past Day 7 — no phantom
+  // missed days or streak resets while they wait for their unlock code.
+  if(expected > TRIAL_END_DAY && subjectToTrialWall()) return TRIAL_END_DAY;
   return expected;
 }
 
@@ -1310,6 +1378,10 @@ function swTab(name,el){
 function renderToday(){
   if(!Array.isArray(S.nns)) S.nns=[];
   if(!S.days||typeof S.days!=='object') S.days={};
+  var _tl=document.getElementById('trial-lock'),_oe=document.getElementById('open-entry-btn');
+  var _walled=trialWalled();
+  if(_tl)_tl.style.display=_walled?'block':'none';
+  if(_oe)_oe.style.display=_walled?'none':'block';
   const d=S.cd;const sd=S.days[d]||{};
   const ne=document.getElementById('t-nns');ne.innerHTML='';
   S.nns.forEach((nn,i)=>{
@@ -1406,7 +1478,7 @@ function saveDB(){
   const wk=(DD[S.cd-1] && DD[S.cd-1].w) ? DD[S.cd-1].w : Math.min(Math.ceil(S.cd/7),4);
   if(!S.debrief)S.debrief={};
   S.debrief[wk]={hard:document.getElementById('db-hard').value,exc:document.getElementById('db-exc').value,next:document.getElementById('db-next').value};
-  save();const b=event.target;b.textContent='Saved ✓';b.style.color='var(--gn)';b.style.borderColor='var(--gn)';
+  save(true);const b=event.target;b.textContent='Saved ✓';b.style.color='var(--gn)';b.style.borderColor='var(--gn)';
   setTimeout(()=>{b.textContent='Save Debrief';b.style.color='';b.style.borderColor='';},2000);
 }
 
@@ -1444,6 +1516,7 @@ function updResist(v){
 }
 
 function openDay(dn){
+  if(dn>TRIAL_END_DAY && subjectToTrialWall()){ alert('Days 8\u201330 are locked. Complete the trial and enter your unlock code on the Today tab.'); return; }
   aDay=dn;const d=DD[dn-1];const sd=S.days[dn]||{};const wk=d.w;
   document.getElementById('dv-lbl').textContent='Day '+dn+' / 30 · Week '+wk+': '+WK_NAMES[wk-1];
   document.getElementById('dv-tit').textContent=d.t;
@@ -1583,9 +1656,10 @@ function compDay(){
   S.days[aDay].completed=true;
 
   const wasCurrentDay=aDay===S.cd;
-  if(wasCurrentDay&&aDay<30){S.cd=aDay+1;S.streak++;}
+  if(wasCurrentDay&&aDay===TRIAL_END_DAY&&subjectToTrialWall()){S.streak++;} // wall: Day 7 completes, cd holds at 7
+  else if(wasCurrentDay&&aDay<30){S.cd=aDay+1;S.streak++;}
   else if(wasCurrentDay){S.streak++;}
-  save();
+  save(true);
 
   // Check for rank up or milestone
   if(wasCurrentDay){
@@ -1977,16 +2051,23 @@ function resetDayContent() {
 
 function loadTesterActivity() {
   if (!window.fbGetTesters) return;
-  window.fbGetTesters(function(testers) {
+  window.fbGetTesters(function(testers, err) {
     const el = document.getElementById('admin-tester-list');
     if (!el) return;
-    if (!testers || Object.keys(testers).length === 0) {
-      el.innerHTML = '<div style="font-size:12px;color:var(--di)">No tester activity yet</div>';
+    if (err) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--rd2);line-height:1.6">Couldn\u2019t load testers (' + err + ').<br>If this says permission denied, the database rules are missing the admin read grant on the users node.</div>';
       return;
     }
-    const uids = Object.keys(testers);
+    // Exclude the admin's own account — these panels are about testers.
+    const uids = Object.keys(testers || {}).filter(function(u){ return u !== 'VKhgQzYfhIWwGsaxgdoeh0vyVVe2'; });
     const totalUsers = document.getElementById('admin-total-users');
     if (totalUsers) totalUsers.textContent = uids.length;
+    if (uids.length === 0) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--di)">No tester activity yet</div>';
+      const _ad=document.getElementById('admin-avg-day'); if(_ad) _ad.textContent='—';
+      const _co=document.getElementById('admin-completions'); if(_co) _co.textContent='—';
+      return;
+    }
     let totalDay = 0, totalComp = 0;
     el.innerHTML = '';
     uids.forEach(function(uid, idx) {
