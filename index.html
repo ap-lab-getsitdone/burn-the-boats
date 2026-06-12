@@ -1234,9 +1234,9 @@ function signBegin(){
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TRIAL_END_DAY = 7;
 const UNLOCK_CODE = 'KEEPGOING';
-// Master switch for the Day 7 trial wall. false = wall fully dormant (program
-// runs 1-30 uninterrupted). Flip to true and redeploy when ready to arm it.
-const TRIAL_WALL_ENABLED = false;
+// Master switch for the Day 7 trial wall. true = ARMED: Day 7 completion locks
+// Days 8-30 behind the unlock code. Flip to false and redeploy to disarm.
+const TRIAL_WALL_ENABLED = true;
 // True for accounts subject to the trial wall (no full access, not the owner).
 function subjectToTrialWall(){ return TRIAL_WALL_ENABLED && !S.fullAccess && window.UID !== 'VKhgQzYfhIWwGsaxgdoeh0vyVVe2'; }
 // True once Day 7 is completed and the account is still walled.
