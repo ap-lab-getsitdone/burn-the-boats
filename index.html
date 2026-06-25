@@ -553,6 +553,11 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
           else if (Array.isArray(newData.days)) newData.days = Object.assign({}, newData.days);
           if (!newData.debrief || typeof newData.debrief !== 'object') newData.debrief = {};
           if (typeof newData.cd !== 'number') newData.cd = parseInt(newData.cd) || 1;
+          // Preserve identity/crew fields if a stale echo arrives without them —
+          // never let a partial snapshot wipe a username or crew the user has set.
+          if (!newData.username && window.S && window.S.username) newData.username = window.S.username;
+          if (!newData.usernameSetAt && window.S && window.S.usernameSetAt) newData.usernameSetAt = window.S.usernameSetAt;
+          if (!newData.crewId && window.S && window.S.crewId) { newData.crewId = window.S.crewId; newData.crewName = window.S.crewName; newData.crewRole = window.S.crewRole; }
         }
         const oldCd = window.S ? window.S.cd : null;
         window.S = newData;
@@ -1389,6 +1394,9 @@ function usernameChangeAllowed(){
 }
 
 function save(immediate){
+  // Keep window.S and the local S as the same object so the realtime listener
+  // and the save path never diverge (root cause of lost username/crew on reload).
+  window.S = S;
   // localStorage is written instantly, every time — the on-device source of truth.
   try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
   if(!window.fbSave) return;
@@ -1800,15 +1808,24 @@ function searchCrew(){
       '<div class="card" style="border-color:var(--gn)">'+
         '<div style="font-family:var(--fd);font-weight:900;font-size:18px;letter-spacing:.5px;text-transform:uppercase">'+escapeHtml(crew.name)+'</div>'+
         '<div style="font-size:11px;color:var(--mu);margin:2px 0 10px">'+crew.voyageLength+'-day voyage \u00b7 '+count+' aboard</div>'+
-        '<button class="btn btn-p" onclick="joinFoundCrew(\''+crew.id+'\',\''+encodeURIComponent(crew.name)+'\')">Join This Crew</button>'+
+        '<div style="font-size:12px;color:var(--mu);margin-bottom:6px">Enter the crew code to join. Ask the captain if you don\u2019t have it.</div>'+
+        '<input type="text" id="crew-join-code" placeholder="CREW CODE" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px;font-family:var(--fd);font-weight:700">'+
+        '<div id="crew-join-code-msg" style="font-size:12px;min-height:16px;margin-bottom:6px;line-height:1.4"></div>'+
+        '<button class="btn btn-p" onclick="joinFoundCrew(\''+crew.id+'\',\''+encodeURIComponent(crew.name)+'\',\''+encodeURIComponent(crew.code)+'\')">Join This Crew</button>'+
       '</div>';
   });
 }
 
-function joinFoundCrew(crewId, encName){
+function joinFoundCrew(crewId, encName, encCode){
   const name=decodeURIComponent(encName);
+  const correctCode=decodeURIComponent(encCode);
+  const codeEl=document.getElementById('crew-join-code');
+  const codeMsg=document.getElementById('crew-join-code-msg');
+  const entered=((codeEl&&codeEl.value)||'').trim().toUpperCase();
+  if(!entered){ if(codeMsg){codeMsg.textContent='Enter the crew code.'; codeMsg.style.color='var(--rd2)';} return; }
+  if(entered!==correctCode.toUpperCase()){ if(codeMsg){codeMsg.textContent='Wrong code. Ask your captain.'; codeMsg.style.color='var(--rd2)';} return; }
   window.fbJoinCrew(crewId, S.username, function(ok, e){
-    if(!ok){ alert('Couldn\u2019t join ('+(e||'error')+'). Try again.'); return; }
+    if(!ok){ if(codeMsg){codeMsg.textContent='Couldn\u2019t join ('+(e||'error')+'). Try again.'; codeMsg.style.color='var(--rd2)';} return; }
     S.crewId=crewId; S.crewName=name; S.crewRole='member'; save(true);
     renderCrew();
   });
