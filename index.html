@@ -374,6 +374,35 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       .catch(function(e){ console.warn('Firebase save failed:', e); return false; });
   };
 
+  // ── COHORT FEED (PUBLIC STATUS ONLY) ──
+  // Writes ONLY shareable status to a separate node. Private data (reflections,
+  // proof, standards) is never written here. This node is the only thing other
+  // testers can read about each other. "Witness, not surveillance."
+  window.fbWriteFeed = function(status) {
+    if (!UID) return Promise.resolve(false);
+    // Whitelist exactly the fields allowed to be public. Nothing else can leak.
+    var safe = {
+      name: (status.name || 'Sailor').toString().slice(0, 40),
+      currentDay: parseInt(status.currentDay) || 1,
+      daysAtSea: parseInt(status.daysAtSea) || 0,
+      lastCompletedDay: parseInt(status.lastCompletedDay) || 0,
+      updatedAt: Date.now()
+    };
+    return set(ref(db, 'feed/' + UID), safe)
+      .then(function(){ return true; })
+      .catch(function(e){ console.warn('Feed write failed:', e); return false; });
+  };
+
+  // Read the whole feed (all crew members' public status) for display.
+  window.fbReadFeed = function(callback) {
+    get(ref(db, 'feed')).then(function(snap){
+      callback(snap.exists() ? snap.val() : {});
+    }).catch(function(e){
+      console.warn('Feed read failed:', e);
+      callback(null, (e && (e.code || e.message)) || 'unknown error');
+    });
+  };
+
   // ── FIREBASE LOAD (replaces localStorage load) ──
   window.fbLoad = function(callback) {
     if (!UID) { callback(null); return; } // Guard against null UID
@@ -839,6 +868,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 
   <div class="tabs">
     <div class="tab active" onclick="swTab('today',this)">Today</div>
+    <div class="tab" onclick="swTab('crew',this)">Crew</div>
     <div class="tab" onclick="swTab('week',this)">Week</div>
     <div class="tab" onclick="swTab('program',this)">Program</div>
   </div>
@@ -860,6 +890,14 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
         <input id="unlock-code" type="text" autocapitalize="characters" autocomplete="off" placeholder="ENTER CODE" style="margin-top:14px;width:100%;max-width:240px;background:var(--bg);border:1px solid var(--b2);color:var(--tx);padding:10px;text-align:center;font-family:var(--fd);font-weight:700;letter-spacing:3px;font-size:14px;border-radius:2px">
         <button class="btn btn-p" style="margin-top:10px;max-width:240px" onclick="tryUnlock()">UNLOCK THE FULL 30</button>
       </div>
+    </div>
+  </div>
+
+  <div id="tab-crew" class="tab-panel">
+    <div class="content">
+      <div class="slbl">The Crew</div>
+      <div style="font-size:12px;color:var(--mu);line-height:1.6;margin-bottom:14px">Everyone sailing right now. You see who held the standard today — not how. Proof stays private.</div>
+      <div id="crew-feed"><div style="font-size:12px;color:var(--di)">Loading the crew...</div></div>
     </div>
   </div>
 
@@ -1178,6 +1216,27 @@ function load(callback){
     if(callback) callback();
   }
 }
+// ── COHORT FEED PUSH ──
+// Sends ONLY this user's shareable status to the public feed node.
+// Pulls from S but hand-picks safe fields — never reflections, proof, standards.
+function pushFeed(){
+  if(!window.fbWriteFeed) return;
+  // Days at sea = current streak. lastCompletedDay = highest completed day number.
+  var lastDone=0;
+  if(S.days && typeof S.days==='object'){
+    Object.keys(S.days).forEach(function(k){
+      var dn=parseInt(k);
+      if(S.days[k] && S.days[k].completed && dn>lastDone) lastDone=dn;
+    });
+  }
+  window.fbWriteFeed({
+    name: S.sig || 'Sailor',
+    currentDay: S.cd || 1,
+    daysAtSea: S.streak || 0,
+    lastCompletedDay: lastDone
+  });
+}
+
 function save(immediate){
   // localStorage is written instantly, every time — the on-device source of truth.
   try{localStorage.setItem('btb30v2',JSON.stringify(S));}catch(e){}
@@ -1370,6 +1429,64 @@ function swTab(name,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
+  if(name==='crew') renderCrew();
+}
+
+// ═══════════════════════════════════
+// CREW FEED TAB
+// ═══════════════════════════════════
+function renderCrew(){
+  const el=document.getElementById('crew-feed');
+  if(!el) return;
+  if(!window.fbReadFeed){ el.innerHTML='<div style="font-size:12px;color:var(--di)">Crew feed unavailable.</div>'; return; }
+  el.innerHTML='<div style="font-size:12px;color:var(--di)">Loading the crew...</div>';
+  // Push our own current status first so we always appear, then read the crew.
+  if(typeof pushFeed==='function') pushFeed();
+  window.fbReadFeed(function(feed, err){
+    if(err){
+      el.innerHTML='<div style="font-size:12px;color:var(--rd2);line-height:1.6">Couldn\u2019t load the crew ('+err+').<br>If this says permission denied, the database rules need the feed node added.</div>';
+      return;
+    }
+    const uids=Object.keys(feed||{});
+    if(uids.length===0){ el.innerHTML='<div style="font-size:12px;color:var(--di)">No crew activity yet. Be the first to hold the standard today.</div>'; return; }
+    // Sort by days at sea (desc), then most recently active.
+    uids.sort(function(a,b){
+      const da=feed[a].daysAtSea||0, db_=feed[b].daysAtSea||0;
+      if(db_!==da) return db_-da;
+      return (feed[b].updatedAt||0)-(feed[a].updatedAt||0);
+    });
+    let html='';
+    uids.forEach(function(uid){
+      const m=feed[uid]||{};
+      const isMe = uid===window.UID;
+      const name=(m.name||'Sailor');
+      const day=parseInt(m.currentDay)||1;
+      const sea=parseInt(m.daysAtSea)||0;
+      const doneToday = (parseInt(m.lastCompletedDay)||0) >= day;
+      const ago=timeAgo(m.updatedAt);
+      html+='<div style="display:flex;align-items:center;gap:12px;background:'+(isMe?'#0a180c':'var(--s1)')+';border:1px solid '+(isMe?'var(--gn)':'var(--b1)')+';border-radius:3px;padding:12px 14px;margin-bottom:7px">'+
+        '<div style="width:30px;height:30px;border-radius:50%;background:'+(doneToday?'var(--gn)':'var(--s3)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;color:#fff">'+(doneToday?'\u2713':'\u2693')+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-family:var(--fd);font-weight:700;font-size:14px;letter-spacing:.5px;color:var(--tx)">'+escapeHtml(name)+(isMe?' <span style="color:var(--gn);font-size:10px;letter-spacing:1px">(YOU)</span>':'')+'</div>'+
+          '<div style="font-size:11px;color:var(--mu);margin-top:1px">Day '+day+' \u00b7 '+sea+' days at sea'+(ago?' \u00b7 '+ago:'')+'</div>'+
+        '</div>'+
+        '<div style="font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+(doneToday?'var(--gn)':'var(--di)')+'">'+(doneToday?'Held':'At sea')+'</div>'+
+      '</div>';
+    });
+    el.innerHTML=html;
+  });
+}
+
+function timeAgo(ts){
+  if(!ts) return '';
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
 
 // ═══════════════════════════════════
@@ -1660,6 +1777,7 @@ function compDay(){
   else if(wasCurrentDay&&aDay<30){S.cd=aDay+1;S.streak++;}
   else if(wasCurrentDay){S.streak++;}
   save(true);
+  pushFeed();
 
   // Check for rank up or milestone
   if(wasCurrentDay){
