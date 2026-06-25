@@ -403,6 +403,103 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
     });
   };
 
+  // ── USERNAME SYSTEM ──
+  // Reserved usernames map: username(lowercase) -> uid. Enforces uniqueness.
+  window.fbCheckUsername = function(username, callback) {
+    var key = username.toLowerCase();
+    get(ref(db, 'usernames/' + key)).then(function(snap){
+      if (snap.exists() && snap.val() !== UID) callback(false); // taken by someone else
+      else callback(true); // available (or already ours)
+    }).catch(function(e){ console.warn('Username check failed:', e); callback(null); });
+  };
+
+  window.fbClaimUsername = function(username, oldUsername, callback) {
+    if (!UID) { callback(false, 'not signed in'); return; }
+    var key = username.toLowerCase();
+    // Reserve the new name, then release the old one if different.
+    set(ref(db, 'usernames/' + key), UID).then(function(){
+      if (oldUsername && oldUsername.toLowerCase() !== key) {
+        return set(ref(db, 'usernames/' + oldUsername.toLowerCase()), null);
+      }
+    }).then(function(){ callback(true); })
+      .catch(function(e){ console.warn('Username claim failed:', e); callback(false, (e && e.code) || 'error'); });
+  };
+
+  // ── CREW SYSTEM ──
+  // Crew data model: crews/{crewId} = {name, code, captain(uid), voyageLength,
+  //   createdAt, members:{uid:{username,joinedAt}}}. crewNames/{nameLower}=crewId
+  //   enforces unique searchable names.
+  window.fbCreateCrew = function(crewData, callback) {
+    if (!UID) { callback(false, 'not signed in'); return; }
+    var nameKey = crewData.name.toLowerCase();
+    // Check name uniqueness first.
+    get(ref(db, 'crewNames/' + nameKey)).then(function(snap){
+      if (snap.exists()) { callback(false, 'name-taken'); return; }
+      var crewId = 'crew_' + UID + '_' + Date.now();
+      var crew = {
+        name: crewData.name,
+        code: crewData.code,
+        captain: UID,
+        captainName: crewData.captainName || 'Captain',
+        voyageLength: parseInt(crewData.voyageLength) || 30,
+        createdAt: Date.now(),
+        members: {}
+      };
+      crew.members[UID] = { username: crewData.captainName || 'Captain', joinedAt: Date.now() };
+      // Write crew, name reservation, and the user's crew pointer together.
+      Promise.all([
+        set(ref(db, 'crews/' + crewId), crew),
+        set(ref(db, 'crewNames/' + nameKey), crewId)
+      ]).then(function(){ callback(true, crewId); })
+        .catch(function(e){ console.warn('Create crew failed:', e); callback(false, (e && e.code) || 'error'); });
+    }).catch(function(e){ console.warn('Crew name check failed:', e); callback(false, 'check-failed'); });
+  };
+
+  window.fbFindCrew = function(name, callback) {
+    var nameKey = name.toLowerCase();
+    get(ref(db, 'crewNames/' + nameKey)).then(function(snap){
+      if (!snap.exists()) { callback(null); return; }
+      var crewId = snap.val();
+      get(ref(db, 'crews/' + crewId)).then(function(cs){
+        callback(cs.exists() ? Object.assign({ id: crewId }, cs.val()) : null);
+      }).catch(function(){ callback(null); });
+    }).catch(function(e){ console.warn('Find crew failed:', e); callback(null, 'error'); });
+  };
+
+  window.fbJoinCrew = function(crewId, username, callback) {
+    if (!UID) { callback(false, 'not signed in'); return; }
+    set(ref(db, 'crews/' + crewId + '/members/' + UID), { username: username || 'Sailor', joinedAt: Date.now() })
+      .then(function(){ callback(true); })
+      .catch(function(e){ console.warn('Join crew failed:', e); callback(false, (e && e.code) || 'error'); });
+  };
+
+  window.fbLeaveCrew = function(crewId, callback) {
+    if (!UID) { callback(false); return; }
+    set(ref(db, 'crews/' + crewId + '/members/' + UID), null)
+      .then(function(){ callback(true); })
+      .catch(function(e){ console.warn('Leave crew failed:', e); callback(false); });
+  };
+
+  window.fbRemoveMember = function(crewId, memberUid, callback) {
+    set(ref(db, 'crews/' + crewId + '/members/' + memberUid), null)
+      .then(function(){ callback(true); })
+      .catch(function(e){ console.warn('Remove member failed:', e); callback(false); });
+  };
+
+  window.fbDisbandCrew = function(crewId, crewName, callback) {
+    Promise.all([
+      set(ref(db, 'crews/' + crewId), null),
+      set(ref(db, 'crewNames/' + crewName.toLowerCase()), null)
+    ]).then(function(){ callback(true); })
+      .catch(function(e){ console.warn('Disband failed:', e); callback(false); });
+  };
+
+  window.fbGetCrew = function(crewId, callback) {
+    get(ref(db, 'crews/' + crewId)).then(function(snap){
+      callback(snap.exists() ? Object.assign({ id: crewId }, snap.val()) : null);
+    }).catch(function(){ callback(null); });
+  };
+
   // ── FIREBASE LOAD (replaces localStorage load) ──
   window.fbLoad = function(callback) {
     if (!UID) { callback(null); return; } // Guard against null UID
@@ -843,7 +940,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
       </div>
       <button id="admin-btn" onclick="openAdmin()" style="display:none;background:var(--s2);border:1px solid var(--b2);color:var(--mu);font-size:10px;letter-spacing:1px;padding:4px 8px;border-radius:2px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase" title="Admin Dashboard">⚙ ADMIN</button>
     </div>
-    <div class="topbar-right"><button onclick="doSignOut()" style="background:transparent;border:1px solid var(--b2);color:var(--mu);font-size:9px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:2px;margin-right:4px">SIGN OUT</button><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
+    <div class="topbar-right"><button onclick="openProfile()" style="background:transparent;border:1px solid var(--b2);color:var(--mu);font-size:9px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:2px;margin-right:4px">PROFILE</button><button onclick="doSignOut()" style="background:transparent;border:1px solid var(--b2);color:var(--mu);font-size:9px;letter-spacing:1px;cursor:pointer;font-family:var(--fd);font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:2px;margin-right:4px">SIGN OUT</button><span id="sync-status" style="font-size:10px;color:#27ae60;letter-spacing:1px;margin-right:6px"></span>
       <div class="rank-pill" id="rank-display">Landlubber</div>
       <div class="streak">🔥 <span id="streak-n">0</span></div>
     </div>
@@ -895,9 +992,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
 
   <div id="tab-crew" class="tab-panel">
     <div class="content">
-      <div class="slbl">The Crew</div>
-      <div style="font-size:12px;color:var(--mu);line-height:1.6;margin-bottom:14px">Everyone sailing right now. You see who held the standard today — not how. Proof stays private.</div>
-      <div id="crew-feed"><div style="font-size:12px;color:var(--di)">Loading the crew...</div></div>
+      <div id="crew-content"><div style="font-size:12px;color:var(--di)">Loading...</div></div>
     </div>
   </div>
 
@@ -945,6 +1040,31 @@ textarea{resize:vertical;min-height:70px;line-height:1.6}
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PROFILE / SETTINGS SCREEN
+═══════════════════════════════════ -->
+<div id="sc-profile" class="screen">
+  <button class="back-btn" onclick="showMain()">← Back</button>
+  <div class="content">
+    <div class="dh">
+      <div class="dhl">SETTINGS</div>
+      <div class="dht">Profile</div>
+      <div class="dhs">Your username is how the crew knows you. Choose it well — you can only change it once every 30 days.</div>
+    </div>
+
+    <div class="slbl">Username</div>
+    <input type="text" id="profile-username" placeholder="3-20 chars · letters, numbers, _" maxlength="20" autocapitalize="none" autocomplete="off">
+    <div id="profile-username-msg" style="font-size:12px;min-height:18px;margin-bottom:8px;line-height:1.5"></div>
+    <button class="btn btn-p" onclick="saveUsername()">Save Username</button>
+
+    <div class="div"></div>
+    <div class="slbl">Account</div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--mu);line-height:1.6" id="profile-account-info">Signed in.</div>
     </div>
   </div>
 </div>
@@ -1230,11 +1350,42 @@ function pushFeed(){
     });
   }
   window.fbWriteFeed({
-    name: S.sig || 'Sailor',
+    name: S.username || S.sig || 'Sailor',
     currentDay: S.cd || 1,
     daysAtSea: S.streak || 0,
     lastCompletedDay: lastDone
   });
+}
+
+// ── USERNAME VALIDATION + PROFANITY FILTER ──
+// Strong deterrent blocklist — covers obvious curse words and slurs. Not
+// impenetrable (creative misspellings exist), but signals the standard. Admin
+// can catch edge cases manually since admin sees all users.
+var BLOCKED_TERMS = ['fuck','shit','bitch','cunt','nigger','nigga','faggot','fag','retard','spic','chink','kike','wetback','dyke','tranny','whore','slut','rape','nazi','coon','beaner','gook','pussy','dick','cock','asshole'];
+function containsProfanity(str){
+  var s = str.toLowerCase().replace(/[^a-z0-9]/g,'');
+  for(var i=0;i<BLOCKED_TERMS.length;i++){
+    var t = BLOCKED_TERMS[i].replace(/[^a-z0-9]/g,'');
+    if(s.indexOf(t) !== -1) return true;
+  }
+  return false;
+}
+// Returns null if valid, or an error string.
+function validateUsername(name){
+  if(!name) return 'Enter a username.';
+  if(name.length < 3) return 'Username must be at least 3 characters.';
+  if(name.length > 20) return 'Username must be 20 characters or less.';
+  if(!/^[a-zA-Z0-9_]+$/.test(name)) return 'Letters, numbers, and underscores only.';
+  if(containsProfanity(name)) return 'That username isn\u2019t allowed. Keep it clean.';
+  return null;
+}
+// 30-day change cooldown. Returns null if allowed, or a message.
+function usernameChangeAllowed(){
+  if(!S.usernameSetAt) return null; // never set — allowed
+  var days = (Date.now() - S.usernameSetAt) / (24*60*60*1000);
+  if(days >= 30) return null;
+  var left = Math.ceil(30 - days);
+  return 'You can change your username again in ' + left + ' day' + (left===1?'':'s') + '.';
 }
 
 function save(immediate){
@@ -1404,6 +1555,61 @@ function startClock(){
   window._clockTimer=setInterval(tick,1000);
 }
 
+// ── PROFILE / USERNAME ──
+function openProfile(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-profile').classList.add('active');
+  var inp=document.getElementById('profile-username');
+  var msg=document.getElementById('profile-username-msg');
+  inp.value = S.username || '';
+  var cooldown = usernameChangeAllowed();
+  if(S.username && cooldown){
+    msg.textContent = cooldown;
+    msg.style.color = 'var(--mu)';
+    inp.disabled = true;
+  } else {
+    msg.textContent = S.username ? '' : 'Pick a username so your crew can find you.';
+    msg.style.color = 'var(--mu)';
+    inp.disabled = false;
+  }
+  window.scrollTo(0,0);
+}
+
+function saveUsername(){
+  var inp=document.getElementById('profile-username');
+  var msg=document.getElementById('profile-username-msg');
+  var name=(inp.value||'').trim();
+
+  // Cooldown check (only if they already have one).
+  if(S.username){
+    var cd=usernameChangeAllowed();
+    if(cd){ msg.textContent=cd; msg.style.color='var(--rd2)'; return; }
+    if(name.toLowerCase()===S.username.toLowerCase()){ msg.textContent='That\u2019s already your username.'; msg.style.color='var(--mu)'; return; }
+  }
+
+  // Format + profanity.
+  var err=validateUsername(name);
+  if(err){ msg.textContent=err; msg.style.color='var(--rd2)'; return; }
+
+  msg.textContent='Checking availability...'; msg.style.color='var(--mu)';
+
+  if(!window.fbCheckUsername){ msg.textContent='Connection unavailable. Try again.'; msg.style.color='var(--rd2)'; return; }
+  window.fbCheckUsername(name, function(available){
+    if(available===null){ msg.textContent='Couldn\u2019t check right now. Try again.'; msg.style.color='var(--rd2)'; return; }
+    if(!available){ msg.textContent='That username is taken. Try another.'; msg.style.color='var(--rd2)'; return; }
+    var old=S.username||'';
+    window.fbClaimUsername(name, old, function(ok, e){
+      if(!ok){ msg.textContent='Couldn\u2019t save ('+(e||'error')+'). Try again.'; msg.style.color='var(--rd2)'; return; }
+      S.username=name;
+      S.usernameSetAt=Date.now();
+      save(true);
+      msg.textContent='✓ Username saved.'; msg.style.color='var(--gn)';
+    });
+  });
+}
+
+function openProfileFromSetup(){ openProfile(); }
+
 function showMain(){
   if(window.S && window.S.started) S=window.S;
   // Normalize state shape — Firebase records can be missing fields (e.g. nns),
@@ -1435,45 +1641,202 @@ function swTab(name,el){
 // ═══════════════════════════════════
 // CREW FEED TAB
 // ═══════════════════════════════════
+// ═══════════════════════════════════
+// CREW TAB — create / join / roster
+// ═══════════════════════════════════
 function renderCrew(){
-  const el=document.getElementById('crew-feed');
+  const el=document.getElementById('crew-content');
   if(!el) return;
-  if(!window.fbReadFeed){ el.innerHTML='<div style="font-size:12px;color:var(--di)">Crew feed unavailable.</div>'; return; }
-  el.innerHTML='<div style="font-size:12px;color:var(--di)">Loading the crew...</div>';
-  // Push our own current status first so we always appear, then read the crew.
+
+  // Must have a username before touching crews.
+  if(!S.username){
+    el.innerHTML='<div class="slbl">The Crew</div>'+
+      '<div style="font-size:13px;color:var(--mu);line-height:1.7;margin-bottom:14px">Set a username first so your crew can know you.</div>'+
+      '<button class="btn btn-p" onclick="openProfile()">Set Your Username →</button>';
+    return;
+  }
+
+  // In a crew already → show roster.
+  if(S.crewId){
+    renderCrewRoster(el);
+    return;
+  }
+
+  // No crew → create or join.
+  el.innerHTML=
+    '<div class="slbl">The Crew</div>'+
+    '<div style="font-size:13px;color:var(--mu);line-height:1.7;margin-bottom:16px">A crew sails together. You can be in one crew at a time. Start your own and captain it, or join one that exists.</div>'+
+    '<div class="card" style="margin-bottom:10px">'+
+      '<div style="font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Start a Crew</div>'+
+      '<div style="font-size:12px;color:var(--mu);margin-bottom:10px">You become captain. Name it, set the voyage length, share the code.</div>'+
+      '<input type="text" id="crew-create-name" placeholder="Crew name (unique, searchable)" maxlength="30" autocomplete="off">'+
+      '<select id="crew-create-length" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:2px;color:var(--tx);font-family:var(--fb);font-size:13px;padding:10px 12px;margin-bottom:8px">'+
+        '<option value="30">30-day voyage</option>'+
+        '<option value="60">60-day voyage</option>'+
+        '<option value="90">90-day voyage</option>'+
+      '</select>'+
+      '<div id="crew-create-msg" style="font-size:12px;min-height:16px;margin-bottom:6px;line-height:1.4"></div>'+
+      '<button class="btn btn-p" onclick="createCrew()">Create Crew</button>'+
+    '</div>'+
+    '<div class="card">'+
+      '<div style="font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Join a Crew</div>'+
+      '<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Search the crew name and sign on.</div>'+
+      '<input type="text" id="crew-join-name" placeholder="Search crew name" maxlength="30" autocomplete="off">'+
+      '<div id="crew-join-msg" style="font-size:12px;min-height:16px;margin-bottom:6px;line-height:1.4"></div>'+
+      '<button class="btn btn-p" onclick="searchCrew()">Search</button>'+
+      '<div id="crew-search-result" style="margin-top:10px"></div>'+
+    '</div>';
+}
+
+function renderCrewRoster(el){
+  if(!window.fbGetCrew){ el.innerHTML='<div style="font-size:12px;color:var(--di)">Unavailable.</div>'; return; }
+  el.innerHTML='<div style="font-size:12px;color:var(--di)">Loading your crew...</div>';
+  // Push our status so our row is current, then load the crew.
   if(typeof pushFeed==='function') pushFeed();
-  window.fbReadFeed(function(feed, err){
-    if(err){
-      el.innerHTML='<div style="font-size:12px;color:var(--rd2);line-height:1.6">Couldn\u2019t load the crew ('+err+').<br>If this says permission denied, the database rules need the feed node added.</div>';
-      return;
+  window.fbGetCrew(S.crewId, function(crew){
+    if(!crew){
+      // Crew was disbanded or gone — clear our pointer.
+      S.crewId=null; S.crewName=null; save(true);
+      renderCrew(); return;
     }
-    const uids=Object.keys(feed||{});
-    if(uids.length===0){ el.innerHTML='<div style="font-size:12px;color:var(--di)">No crew activity yet. Be the first to hold the standard today.</div>'; return; }
-    // Sort by days at sea (desc), then most recently active.
-    uids.sort(function(a,b){
-      const da=feed[a].daysAtSea||0, db_=feed[b].daysAtSea||0;
-      if(db_!==da) return db_-da;
-      return (feed[b].updatedAt||0)-(feed[a].updatedAt||0);
-    });
-    let html='';
-    uids.forEach(function(uid){
-      const m=feed[uid]||{};
-      const isMe = uid===window.UID;
-      const name=(m.name||'Sailor');
-      const day=parseInt(m.currentDay)||1;
-      const sea=parseInt(m.daysAtSea)||0;
-      const doneToday = (parseInt(m.lastCompletedDay)||0) >= day;
-      const ago=timeAgo(m.updatedAt);
-      html+='<div style="display:flex;align-items:center;gap:12px;background:'+(isMe?'#0a180c':'var(--s1)')+';border:1px solid '+(isMe?'var(--gn)':'var(--b1)')+';border-radius:3px;padding:12px 14px;margin-bottom:7px">'+
-        '<div style="width:30px;height:30px;border-radius:50%;background:'+(doneToday?'var(--gn)':'var(--s3)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;color:#fff">'+(doneToday?'\u2713':'\u2693')+'</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div style="font-family:var(--fd);font-weight:700;font-size:14px;letter-spacing:.5px;color:var(--tx)">'+escapeHtml(name)+(isMe?' <span style="color:var(--gn);font-size:10px;letter-spacing:1px">(YOU)</span>':'')+'</div>'+
-          '<div style="font-size:11px;color:var(--mu);margin-top:1px">Day '+day+' \u00b7 '+sea+' days at sea'+(ago?' \u00b7 '+ago:'')+'</div>'+
+    const isCaptain = crew.captain===window.UID;
+    const members = crew.members || {};
+    const memberUids = Object.keys(members);
+    let html=
+      '<div class="slbl">Your Crew</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between">'+
+          '<div>'+
+            '<div style="font-family:var(--fd);font-weight:900;font-size:22px;letter-spacing:1px;text-transform:uppercase;color:var(--tx)">'+escapeHtml(crew.name)+'</div>'+
+            '<div style="font-size:11px;color:var(--mu);margin-top:2px">'+crew.voyageLength+'-day voyage \u00b7 '+memberUids.length+' aboard'+(isCaptain?' \u00b7 you are captain':'')+'</div>'+
+          '</div>'+
         '</div>'+
-        '<div style="font-family:var(--fd);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:'+(doneToday?'var(--gn)':'var(--di)')+'">'+(doneToday?'Held':'At sea')+'</div>'+
-      '</div>';
-    });
+        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--b1)">'+
+          '<div style="font-size:10px;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Crew Code</div>'+
+          '<div style="font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:3px;color:var(--rd2)">'+escapeHtml(crew.code)+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="slbl">Aboard</div>';
+
+    // Member rows — pull live status from the feed node.
+    html+='<div id="crew-roster-list"><div style="font-size:12px;color:var(--di)">Loading status...</div></div>';
+
+    // Actions
+    if(isCaptain){
+      html+='<button class="btn-s" style="margin-top:14px;border-color:var(--rd);color:var(--rd2)" onclick="confirmDisband()">Disband Crew</button>';
+    } else {
+      html+='<button class="btn-s" style="margin-top:14px" onclick="confirmLeave()">Leave Crew</button>';
+    }
     el.innerHTML=html;
+
+    // Now hydrate member statuses from the feed.
+    window.fbReadFeed(function(feed, err){
+      const list=document.getElementById('crew-roster-list');
+      if(!list) return;
+      if(err){ list.innerHTML='<div style="font-size:12px;color:var(--rd2)">Couldn\u2019t load statuses.</div>'; return; }
+      feed=feed||{};
+      // Sort members by days at sea desc.
+      memberUids.sort(function(a,b){ return ((feed[b]&&feed[b].daysAtSea)||0)-((feed[a]&&feed[a].daysAtSea)||0); });
+      let rows='';
+      memberUids.forEach(function(uid){
+        const m=members[uid]||{};
+        const f=feed[uid]||{};
+        const isMe=uid===window.UID;
+        const isCap=uid===crew.captain;
+        const nm=f.name||m.username||'Sailor';
+        const day=parseInt(f.currentDay)||1;
+        const sea=parseInt(f.daysAtSea)||0;
+        const doneToday=(parseInt(f.lastCompletedDay)||0)>=day;
+        rows+='<div style="display:flex;align-items:center;gap:12px;background:'+(isMe?'#0a180c':'var(--s1)')+';border:1px solid '+(isMe?'var(--gn)':'var(--b1)')+';border-radius:3px;padding:12px 14px;margin-bottom:7px">'+
+          '<div style="width:30px;height:30px;border-radius:50%;background:'+(doneToday?'var(--gn)':'var(--s3)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;color:#fff">'+(doneToday?'\u2713':'\u2693')+'</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-family:var(--fd);font-weight:700;font-size:14px;letter-spacing:.5px;color:var(--tx)">'+escapeHtml(nm)+(isCap?' <span style="color:var(--go);font-size:9px;letter-spacing:1px">\u2693 CAPTAIN</span>':'')+(isMe?' <span style="color:var(--gn);font-size:9px;letter-spacing:1px">(YOU)</span>':'')+'</div>'+
+            '<div style="font-size:11px;color:var(--mu);margin-top:1px">Day '+day+' \u00b7 '+sea+' days at sea</div>'+
+          '</div>'+
+          (isCaptain&&!isCap?'<button onclick="removeMember(\''+uid+'\')" style="background:transparent;border:1px solid var(--b2);color:var(--di);font-size:14px;cursor:pointer;border-radius:2px;padding:2px 8px;flex-shrink:0">\u00d7</button>':'')+
+        '</div>';
+      });
+      list.innerHTML=rows;
+    });
+  });
+}
+
+function createCrew(){
+  const nameEl=document.getElementById('crew-create-name');
+  const msg=document.getElementById('crew-create-msg');
+  const name=(nameEl.value||'').trim();
+  if(name.length<3){ msg.textContent='Crew name must be at least 3 characters.'; msg.style.color='var(--rd2)'; return; }
+  if(name.length>30){ msg.textContent='Crew name too long.'; msg.style.color='var(--rd2)'; return; }
+  if(containsProfanity(name)){ msg.textContent='Keep the crew name clean.'; msg.style.color='var(--rd2)'; return; }
+  const len=parseInt(document.getElementById('crew-create-length').value)||30;
+  // Generate code from name: first 4 alnum chars uppercased + 3 digits.
+  const base=name.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,4)||'CREW';
+  const code=base+Math.floor(100+Math.random()*900);
+  msg.textContent='Creating...'; msg.style.color='var(--mu)';
+  window.fbCreateCrew({ name:name, code:code, captainName:S.username, voyageLength:len }, function(ok, res){
+    if(!ok){
+      if(res==='name-taken'){ msg.textContent='That crew name is taken. Try another.'; }
+      else { msg.textContent='Couldn\u2019t create ('+(res||'error')+'). Try again.'; }
+      msg.style.color='var(--rd2)'; return;
+    }
+    S.crewId=res; S.crewName=name; S.crewRole='captain'; save(true);
+    renderCrew();
+  });
+}
+
+function searchCrew(){
+  const msg=document.getElementById('crew-join-msg');
+  const result=document.getElementById('crew-search-result');
+  const name=(document.getElementById('crew-join-name').value||'').trim();
+  if(name.length<3){ msg.textContent='Enter at least 3 characters.'; msg.style.color='var(--rd2)'; return; }
+  msg.textContent='Searching...'; msg.style.color='var(--mu)';
+  result.innerHTML='';
+  window.fbFindCrew(name, function(crew, err){
+    if(err){ msg.textContent='Search failed. Try again.'; msg.style.color='var(--rd2)'; return; }
+    if(!crew){ msg.textContent='No crew found by that name.'; msg.style.color='var(--mu)'; return; }
+    msg.textContent='';
+    const count=Object.keys(crew.members||{}).length;
+    result.innerHTML=
+      '<div class="card" style="border-color:var(--gn)">'+
+        '<div style="font-family:var(--fd);font-weight:900;font-size:18px;letter-spacing:.5px;text-transform:uppercase">'+escapeHtml(crew.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--mu);margin:2px 0 10px">'+crew.voyageLength+'-day voyage \u00b7 '+count+' aboard</div>'+
+        '<button class="btn btn-p" onclick="joinFoundCrew(\''+crew.id+'\',\''+encodeURIComponent(crew.name)+'\')">Join This Crew</button>'+
+      '</div>';
+  });
+}
+
+function joinFoundCrew(crewId, encName){
+  const name=decodeURIComponent(encName);
+  window.fbJoinCrew(crewId, S.username, function(ok, e){
+    if(!ok){ alert('Couldn\u2019t join ('+(e||'error')+'). Try again.'); return; }
+    S.crewId=crewId; S.crewName=name; S.crewRole='member'; save(true);
+    renderCrew();
+  });
+}
+
+function confirmLeave(){
+  if(!confirm('Leave this crew? You can join another after.')) return;
+  window.fbLeaveCrew(S.crewId, function(ok){
+    if(!ok){ alert('Couldn\u2019t leave. Try again.'); return; }
+    S.crewId=null; S.crewName=null; S.crewRole=null; save(true);
+    renderCrew();
+  });
+}
+
+function confirmDisband(){
+  if(!confirm('Disband this crew? This removes it for everyone aboard. This cannot be undone.')) return;
+  window.fbDisbandCrew(S.crewId, S.crewName, function(ok){
+    if(!ok){ alert('Couldn\u2019t disband. Try again.'); return; }
+    S.crewId=null; S.crewName=null; S.crewRole=null; save(true);
+    renderCrew();
+  });
+}
+
+function removeMember(uid){
+  if(!confirm('Remove this member from the crew?')) return;
+  window.fbRemoveMember(S.crewId, uid, function(ok){
+    if(!ok){ alert('Couldn\u2019t remove. Try again.'); return; }
+    renderCrewRoster(document.getElementById('crew-content'));
   });
 }
 
